@@ -110,15 +110,11 @@ class ilDAVFile implements IFile
 
         if ($this->versioning_enabled) {
             $version = $this->obj->getVersion(true);
-            if ($version === 0) {
-                if ($stream->getSize() > 0) {
-                    $version = $this->obj->appendStream(
-                        $stream,
-                        $name
-                    );
-                }
-            } else {
-                $version = $this->obj->appendStream($stream, $name);
+            if (($stream_content = (string) $stream) !== '') {
+                $version = $this->obj->appendStream(
+                    Streams::ofString($stream_content),
+                    $name
+                );
             }
         } else {
             $version = $this->obj->replaceWithStream($stream, $name);
