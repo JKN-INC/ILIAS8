@@ -36,10 +36,20 @@ class IRSSEventLogObserver implements Observer
         return self::class;
     }
 
+    private function appendData(string $to_message, ?Data $data = null): string
+    {
+        return $to_message . ': ' . ($data ? json_encode($data->getArrayCopy()) : '');
+    }
+
+
     public function update(Event $event, ?Data $data): void
     {
-        $this->logger->info("Event: " . $event->value);
-        $this->logger->info("Data: " . json_encode($data));
+        match ($event->value) {
+            Event::COLLECTION_RESOURCE_ADDED => $this->logger->info($this->appendData("Collection resource added", $data)),
+            Event::FLAVOUR_BUILD_SUCCESS => $this->logger->info($this->appendData("Flavour build success", $data)),
+            Event::FLAVOUR_BUILD_FAILED => $this->logger->warning($this->appendData("Flavour build failed", $data)),
+            default => $this->logger->debug($this->appendData($event->value, $data))
+        };
     }
 
     public function updateFailed(\Throwable $e, Event $event, ?Data $data): void

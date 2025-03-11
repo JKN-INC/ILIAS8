@@ -205,7 +205,7 @@ class InitResourceStorage
             );
 
             // attach general observers
-            $services->events()->attach(new IRSSEventLogObserver($c->logger()->root()), Event::ALL);
+            $services->events()->attach(new IRSSEventLogObserver($c->logger()->irss()), Event::ALL);
 
             return $services;
         };
