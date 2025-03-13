@@ -920,6 +920,11 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
 
     public function importVerifiedFileObject(): void
     {
+        if (!$this->checkPermissionBool('create', '', $this->qplrequest->string('new_type'))) {
+            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('permission_denied'), true);
+            $this->ctrl->redirect($this, 'create');
+            return;
+        }
         $title = '';
         $description = null;
         if ($this->qplrequest->int('questions_only') === 1) {
@@ -1484,7 +1489,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
             return;
         }
         if (!$this->checkPermissionBool('create', '', $_REQUEST['new_type'])) {
-            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('no_create_permission'), true);
+            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('permission_denied'), true);
             $this->ctrl->redirect($this, 'create');
             return;
         }
@@ -1912,8 +1917,8 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
 
                 switch ($item) {
                     case 'taxonomies':
-                        foreach($value as $tax_value) {
-                            if($tax_value === 'null') {
+                        foreach ($value as $tax_value) {
+                            if ($tax_value === 'null') {
                                 $table->addTaxonomyFilterNoTaxonomySet(true);
                             } else {
                                 $tax_nodes = explode('-', $tax_value);
