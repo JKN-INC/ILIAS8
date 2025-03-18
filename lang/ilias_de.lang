@@ -10725,7 +10725,7 @@ ldap#:#ldap_user_sync_cron#:#LDAP-Benutzersynchronisierung
 ldap#:#ldap_user_sync_cron_info#:#Wenn aktiviert, werden Anmeldekonten aus dem LDAP-Verzeichnis importiert und optional laufend synchronisiert.
 ldap#:#ldap_user_sync_info#:#Legt fest, ob noch nicht in ILIAS vorhandene Benutzer automatisch beim ersten Login oder aber regelmäßig per Cron-Job angelegt werden.
 ldap#:#ldap_username_filter#:#Anmeldenamen-Filter
-ldap#:#ldap_username_filter_info#:#Benutzen Sie * als Wildcard.
+ldap#:#ldap_username_filter_info#:#Der Anmeldenamen-Filter kann optional verwendet werden, um diese LDAP-Serverkonfiguration anhand des auf der Anmeldeseite eingegebenen Anmeldenamen automatisch zu bestimmen. Das Zeichen „*“ kann als Platzhalter verwendet werden. Zum Beispiel entspricht „*example\.com“ allen Anmeldenamen, die mit „example.com“ enden. Wenn der konfigurierte Filter mit dem eingegebenen Anmeldenamen übereinstimmt, wird diese LDAP-Serverkonfiguration bevorzugt, falls eine feste Authentifizierungsreihenfolge festgelegt ist.
 ldoc#:#deleteDocument#:#Löschen
 ldoc#:#detachCriterionAssignment#:#Löschen
 ldoc#:#ldoc_acceptance_history#:#Zustimmungshistorie
