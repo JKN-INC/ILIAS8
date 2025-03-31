@@ -41,6 +41,7 @@ use ILIAS\FileDelivery\Token\Compression\Compression;
 use ILIAS\FileDelivery\Token\Transport\Transport;
 use ILIAS\FileDelivery\Token\Signer\Payload\Builder;
 use ILIAS\FileDelivery\Delivery\Disposition;
+use ILIAS\FileDelivery\Token\Transport\URLSafeSplitPathTransport;
 
 /**
  * @author Fabian Schmid <fabian@sr.solutions>
@@ -60,7 +61,7 @@ final class DataSigner
     ) {
         $this->salt_factory = new Factory();
         $compression = new DeflateCompression();
-        $transport = new URLSafeTransport();
+        $transport = new URLSafeSplitPathTransport();
         $algorithm = new SHA1();
 
         $this->signing_serializer = new SigningSerializer(
