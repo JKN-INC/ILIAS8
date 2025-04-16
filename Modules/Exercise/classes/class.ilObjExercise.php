@@ -266,6 +266,12 @@ class ilObjExercise extends ilObject
 
         $new_obj->saveCertificateVisibility($this->getCertificateVisibility());
 
+        //if exercise has rubric then copy that as well
+        $rubric = new ilLPRubricCard($this->getId());
+        if ($rubric->objHasRubric()) {
+            $rubric->copy($new_obj->getId());
+        }
+
         // Copy criteria catalogues
         $crit_cat_map = array();
         foreach (ilExcCriteriaCatalogue::getInstancesByParentId($this->getId()) as $crit_cat) {

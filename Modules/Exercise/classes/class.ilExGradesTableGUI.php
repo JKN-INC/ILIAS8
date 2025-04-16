@@ -58,6 +58,8 @@ class ilExGradesTableGUI extends ilTable2GUI
         $this->random_ass_manager = $service->domain()->assignment()->randomAssignments($this->exc);
 
         $this->exc_id = $this->exc->getId();
+        
+        $this->olp = ilObjectLP::getInstance($this->exc_id);
 
         $this->setId("exc_grades_" . $this->exc_id);
 
@@ -120,7 +122,7 @@ class ilExGradesTableGUI extends ilTable2GUI
         $this->setEnableTitle(true);
         //		$this->setSelectAllCheckbox("assid");
 
-        if (count($mems) > 0) {
+        if (count($mems) > 0 && $this->olp->getCurrentMode() != 92) {
             $this->addCommandButton("saveGrades", $lng->txt("exc_save_changes"));
         }
     }
@@ -194,6 +196,9 @@ class ilExGradesTableGUI extends ilTable2GUI
         // exercise total
 
         // mark input
+        if ($this->olp->getCurrentMode() === 92) {
+            $this->tpl->setVariable("RUBRIC_DISABLED", "disabled");
+        }
         $this->tpl->setCurrentBlock("mark_input");
         $this->tpl->setVariable("TXT_MARK", $lng->txt("exc_mark"));
         $this->tpl->setVariable(

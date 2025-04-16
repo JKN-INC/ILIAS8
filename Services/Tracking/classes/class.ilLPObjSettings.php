@@ -67,6 +67,7 @@ class ilLPObjSettings
     public const LP_MODE_CONTRIBUTION_TO_DISCUSSION = 33;
 
     public const LP_DEFAULT_VISITS = 30;
+    const LP_MODE_RUBRIC = 92;
 
     protected static array $map = array(
 
@@ -208,6 +209,12 @@ class ilLPObjSettings
         self::LP_MODE_INDIVIDUAL_ASSESSMENT => array('ilLPStatusIndividualAssessment',
                                                      'trac_mode_individual_assessment',
                                                      'trac_mode_individual_assessment_info'
+        )
+
+        , 
+        self::LP_MODE_RUBRIC => array('ilLPStatusRubric',
+                                      'trac_mode_rubric', 
+                                      'trac_mode_rubric_info'
         )
 
         ,

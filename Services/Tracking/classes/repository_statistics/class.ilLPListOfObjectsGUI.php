@@ -171,6 +171,25 @@ class ilLPListOfObjectsGUI extends ilLearningProgressBaseGUI
             $this->ctrl->returnToParent($this);
         }
 
+          //Rubric Functionality JKN.
+          if ($this->details_mode == 92) {
+            $passing_grade = $this->saveRubricGrade();
+            if ($passing_grade !== false) {
+                $this->__updateUserRubric(
+                    $_REQUEST['user_id'],
+                    $this->details_obj_id,
+                    $passing_grade
+                );
+            }
+        } else {
+            $this->__updateUser($_REQUEST['user_id'], $this->details_obj_id);
+            $this->tpl->setOnScreenMessage(
+                'success',
+                $this->lng->txt("trac_update_edit_user"),
+                true
+            );
+        }
+
         $this->__updateUser(
             $this->initUserIdFromRequest(),
             $this->details_obj_id
@@ -222,20 +241,212 @@ class ilLPListOfObjectsGUI extends ilLearningProgressBaseGUI
             $this->ctrl->returnToParent($this);
         }
 
-        $info = new ilInfoScreenGUI($this);
-        $info->setFormAction($this->ctrl->getFormAction($this));
-        $this->__showObjectDetails($info, $this->details_obj_id);
+        if ($this->details_mode === 92) {
+            $this->showRubricGradeForm();
+        } else {
+            $info = new ilInfoScreenGUI($this);
+            $info->setFormAction($this->ctrl->getFormAction($this));
+            $this->__showObjectDetails($info, $this->details_obj_id);
 
-        $user_id = $this->initUserIdFromQuery();
-        $this->tpl->setVariable(
-            "ADM_CONTENT",
-            $this->__showEditUser(
-                $user_id,
-                $parent_id,
-                strlen($cancel) > 0 ? $cancel : null,
-                $sub_id ?? 0
-            ) . "<br />" . $info->getHTML()
+            $user_id = $this->initUserIdFromQuery();
+            $this->tpl->setVariable(
+                "ADM_CONTENT",
+                $this->__showEditUser(
+                    $user_id,
+                    $parent_id,
+                    strlen($cancel) > 0 ? $cancel : null,
+                    $sub_id ?? 0
+                ) . "<br />" . $info->getHTML()
+            );
+        }
+
+    }
+
+    public function confirmRegrade(): void
+    {
+        $conf = new ilConfirmationGUI();
+        $conf->setFormAction($this->ctrl->getFormAction($this));
+        $conf->setHeaderText($this->lng->txt('rubric_regrade_warning'));
+        $conf->setFormAction($this->ctrl->getFormAction($this));
+        $conf->addHiddenItem('user_id', $_POST['user_id']);
+        $conf->setConfirm($this->lng->txt('rubric_regrade'), 'regradeUser');
+        $conf->setCancel($this->lng->txt('cancel'), 'cancelRegrade');
+        $this->tpl->setContent($conf->getHTML());
+    }
+
+    function regradeUser()
+    {
+        $usr_id = $_POST['user_id'];
+        $obj_id = ilObject::_lookupObjectId($_GET['ref_id']);
+        include_once("./Services/Tracking/classes/rubric/class.ilLPRubricGrade.php");
+        ilLPRubricGrade::_prepareForRegrade($obj_id, $usr_id);
+        $obj_gui = new ilLPListOfObjectsGUI(0, $_GET['ref_id']);
+        $obj_gui->editUser();;
+    }
+
+    function cancelRegrade(): void
+    {
+        //send back to the rubric
+        $obj_gui = new ilLPListOfObjectsGUI(0, $_GET['ref_id']);
+        $obj_gui->editUser();
+    }
+
+    public function exportGradedPdf(): void
+    {
+        include_once("./Services/Tracking/classes/rubric/class.ilRubricPDF.php");
+        $rubricPDF = new ilRubricPDF($this->getObjId());
+        $rubricPDF->exportGradedPDF();
+    }
+
+    public function exportPDF(): void
+    {
+        include_once("./Services/Tracking/classes/rubric/class.ilRubricPDF.php");
+        $rubricPDF = new ilRubricPDF($this->getObjId());
+        $rubricPDF->exportPDF();
+    }
+
+    /**
+     *  Save Rubric Grade
+     */
+    private function saveRubricGrade(): object | false
+    {
+        // bring in the rubric card object
+        include_once("./Services/Tracking/classes/rubric/class.ilLPRubricGrade.php");
+        $rubricObj = new ilLPRubricGrade($this->getObjId());
+        if ($rubricObj->objHasRubric()) {
+            $rubricObj->grade($rubricObj->load());
+            $this->tpl->setOnScreenMessage(
+                'success',
+                $this->lng->txt("rubric_card_save"),
+                true
+            );
+            $rubricObj->sendRubricNotification($_REQUEST['user_id'], $this->details_obj_id);
+        } else {
+            $this->tpl->setOnScreenMessage(
+                'failure',
+                $this->lng->txt("rubric_card_not_defined"),
+                true
+            );
+        }
+        if ($rubricObj->isGradeCompleted()) {
+            return ($rubricObj->getPassingGrade());
+        } else {
+            return (false);
+        }
+    }
+
+    /**
+     *  Show Rubric Grade
+     */
+    public function showRubricGradeForm($history_id = NULL): void
+    {
+        include_once('./Services/Tracking/classes/rubric/class.ilLPRubricGrade.php');
+        include_once('./Services/Tracking/classes/rubric/class.ilLPRubricGradeGUI.php');
+        $rubricObj = new ilLPRubricGrade($this->getObjId());
+        $rubricGui = new ilLPRubricGradeGUI();
+        $a_user = ilObjectFactory::getInstanceByObjId((int)$_REQUEST['user_id']);
+        if ($rubricObj->objHasRubric() && $rubricObj->isRubricComplete()) {
+            $rubricGui->setUserHistoryId($history_id);
+            if ($rubricObj->isGradingLocked()) {
+                $rubricGui->setRubricGradeLocked($rubricObj->getRubricGradeLocked());
+                $rubricGui->setGradeLockOwner($rubricObj->getGradeLockOwner());
+            }
+            $rubricGui->setRubricData($rubricObj->load());
+            $rubricGui->setUserHistory($rubricObj->getUserHistory((int)$_REQUEST['user_id']));
+            $rubricGui->setUserData($rubricObj->getRubricUserGradeData((int)$_REQUEST['user_id'], $history_id));
+            $rubricGui->setRubricComment($rubricObj->getRubricComment($_REQUEST['user_id'], $history_id));
+            $rubricGui->getRubricGrade(
+                $this->ctrl->getFormAction($this),
+                $a_user->getFullName(),
+                (int)$_REQUEST['user_id']
+            );
+        } else {
+            if (!$rubricObj->objHasRubric()) {
+                $this->tpl->setOnScreenMessage(
+                    'failure',
+                    $this->lng->txt("rubric_card_not_defined"),
+                    true
+                );
+            } elseif (!$rubricObj->isRubricComplete()) {
+                $this->tpl->setOnScreenMessage(
+                    'failure',
+                    $this->lng->txt('rubric_card_not_completed') . '<a href="' . $this->ctrl->getLinkTargetByClass('illplistofobjectsgui', 'showRubricCardForm')
+                    . '">' . $this->lng->txt('rubric_card_please_complete') . '</a>',
+                    true
+                );
+            }
+        }
+    }
+
+    /**
+     * Save Rubric Card
+     */
+    public function saveRubricCard(): void
+    {
+        // bring in the rubric card object
+        include_once("./Services/Tracking/classes/rubric/class.ilLPRubricCard.php");
+        $rubricObj = new ilLPRubricCard($this->getObjId());
+        $rubricObj->save();
+        $this->tpl->setOnScreenMessage(
+            'success',
+            $this->lng->txt("rubric_card_save"),
+            true
         );
+        include_once("./Services/Tracking/classes/rubric/class.ilLPRubricCardGUI.php");
+        $rubricGui = new ilLPRubricCardGUI();
+        if ($rubricObj->objHasRubric()) {
+            $rubricGui->setRubricMode($rubricObj->_lookupRubricMode());
+            $rubricGui->setRubricData($rubricObj->load());
+        }
+        $rubricGui->setPassingGrade($rubricObj->getPassingGrade());
+        $rubricGui->getRubricCard($this->ctrl->getFormAction($this));
+    }
+
+    /**
+     * Show Rubric Form
+     */
+    public function showRubricCardForm(): void
+    {
+        if ($this->isAnonymized()) {
+            ilUtil::sendFailure($this->lng->txt('permission_denied'));
+            return;
+        }
+        // bring in GUI and DB objects
+        include_once("./Services/Tracking/classes/rubric/class.ilLPRubricCard.php");
+        include_once("./Services/Tracking/classes/rubric/class.ilLPRubricCardGUI.php");
+        // instantiate rubric objects
+        $rubricGui = new ilLPRubricCardGUI();
+        $rubricObj = new ilLPRubricCard($this->getObjId());
+        // check to see if rubric data exists for this object, assign data if it does
+        if ($rubricObj->objHasRubric()) {
+            $rubricGui->setRubricData($rubricObj->load());
+        }
+        $rubricGui->setRubricMode($rubricObj->_lookupRubricMode());
+        $rubricGui->setPassingGrade($rubricObj->getPassingGrade());
+        if ($rubricObj->isLocked()) {
+            $rubricGui->setRubricLocked($rubricObj->getRubricLocked());
+            $rubricGui->setRubricOwner($rubricObj->getRubricOwner());
+        }
+        $rubricGui->getRubricCard($this->ctrl->getFormAction($this));
+    }
+
+    public function lockRubricCardForm()
+    {
+        include_once("./Services/Tracking/classes/rubric/class.ilLPRubricCardGUI.php");
+        include_once("./Services/Tracking/classes/rubric/class.ilLPRubricCard.php");
+        $rubricObj = new ilLPRubricCard($this->getObjId());
+        $rubricObj->lockUnlock();
+        if ($rubricObj->isLocked()) {
+            $this->saveRubricCard();
+        }
+        $this->showRubricCardForm();
+    }
+
+    function viewHistory(): void
+    {
+        //send back to the rubric
+        $obj_gui = new ilLPListOfObjectsGUI(0, $_GET['ref_id']);
+        $obj_gui->showRubricGradeForm($_REQUEST['grader_history']);
     }
 
     public function details(): void
