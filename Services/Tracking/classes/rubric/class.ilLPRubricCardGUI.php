@@ -107,7 +107,11 @@ class ilLPRubricCardGUI extends ilLPTableBaseGUI
                 $rubric_commandrow_tpl->setVariable('USER_LOCK', 'disabled');
             }
             if($tmp_user){
-                ilUtil::sendInfo($this->lng->txt('rubric_locked_info') . ' ' . $tmp_user->getFullname() . ' ' . $this->rubric_locked);
+                $this->tpl->setOnScreenMessage(
+                    'info',
+                    $this->lng->txt('rubric_locked_info') . ' ' . $tmp_user->getFullname() . ' ' . $this->rubric_locked,
+                    true
+                );
             }
 
         } else {

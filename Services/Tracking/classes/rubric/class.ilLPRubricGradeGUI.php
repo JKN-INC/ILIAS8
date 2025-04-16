@@ -134,7 +134,11 @@ class ilLPRubricGradeGUI extends ilLPTableBaseGUI
             if ($this->grade_lock_owner !== $this->user->getId()) {
                 $rubric_commandrow_tpl->setVariable('USER_LOCK', 'disabled');
             }
-            ilUtil::sendInfo($this->lng->txt('rubric_locked_grade_info') . ' ' . $tmp_user->getFullname() . ' ' . $this->rubric_grade_locked);
+            $this->tpl->setOnScreenMessage(
+                'info',
+                $this->lng->txt('rubric_locked_grade_info') . ' ' . $tmp_user->getFullname() . ' ' . $this->rubric_grade_locked,
+                true
+            );
         } else {
             $rubric_commandrow_tpl->setVariable('RUBRIC_LOCK', $this->lng->txt('rubric_card_lock'));
         }

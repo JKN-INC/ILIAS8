@@ -24,7 +24,7 @@ class ilLPRubricCardConfirmationGUI
     {
         $conf = new ilConfirmationGUI();
         $conf->setFormAction($this->ctrl->getFormAction($this));
-        ilUtil::sendQuestion($this->lng->txt('rubric_regrade_warning'));
+        $conf->setHeaderText($this->lng->txt('rubric_regrade_warning'));
         $conf->setFormAction($this->ctrl->getFormAction($this));
         $conf->addHiddenItem('user_id', $_POST['user_id']);
         $conf->setConfirm($this->lng->txt('rubric_regrade'), 'regradeUser');
