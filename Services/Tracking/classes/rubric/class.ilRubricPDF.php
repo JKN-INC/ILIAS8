@@ -72,7 +72,7 @@ class ilRubricPDF
         $pdf_factory->deliverPDFFromHTMLString(
             $pdf_output,
             'test.pdf',
-            ilHtmlToPdfTransformerFactory::PDF_OUTPUT_DOWNLOAD,
+            'D',
             "Test",
             "ContentExport"
         );

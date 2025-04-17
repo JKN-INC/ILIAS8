@@ -33,6 +33,7 @@ class ilLPRubricGrade
     {
         return ($this->passing_grade);
     }
+    
     public function getRubricGradeLocked()
     {
         return $this->rubric_grade_locked;
@@ -100,6 +101,13 @@ class ilLPRubricGrade
         );
 
         $row = $res->fetchRow(ilDBConstants::FETCHMODE_OBJECT);
+
+        if (!$row) {
+            $this->rubric_grade_locked = null;
+            $this->grade_lock_owner = null;
+            return false; // No matching row found, grading is not locked
+        }
+        
         $this->rubric_grade_locked = $row->create_date;
         $this->grade_lock_owner = $row->owner;
 
@@ -178,9 +186,11 @@ class ilLPRubricGrade
         //what is the current sequence
         $set = $this->ilDB->query("select sequence from $table");
         $row = $this->ilDB->fetchAssoc($set);
-        $sequence = $row['sequence'];
 
-        if (empty($sequence)) {
+        if ($row && isset($row['sequence'])) {
+            $sequence = $row['sequence'];
+        } else {
+            // If no sequence exists, initialize it
             $this->ilDB->manipulate("insert into $table (sequence) value (1)");
             $sequence = 1;
         }

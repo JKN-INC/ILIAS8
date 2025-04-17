@@ -32,6 +32,7 @@ class ilLPRubricGradeGUI extends ilLPTableBaseGUI
     {
         global $DIC;
         $this->tpl = $DIC["tpl"];
+        $this->lng = $DIC["lng"];
         $this->ctrl = $DIC->ctrl();
         $this->user = $DIC->user();
     }
@@ -90,20 +91,22 @@ class ilLPRubricGradeGUI extends ilLPTableBaseGUI
     {
         // configure the header for content windows
         $rubric_heading_tpl = new ilTemplate('tpl.lp_rubricgrade_heading.html', true, true, 'Services/Tracking');
-
+    
+        // Initialize $version with a default value
+        $version = '';
+    
         if ($this->user_history_id === 'current') {
             $version = $this->lng->txt('rubric_current');
         } elseif (!is_null($this->user_history_id)) {
             $version = '(' . $this->user_history[$this->user_history_id]['create_date'] . ')';
         }
-
+    
         $rubric_heading_tpl->setVariable('RUBRIC_HEADER', $this->lng->txt('trac_rubric') . $version);
         $rubric_heading_tpl->setVariable('USER_FULL_NAME', $user_full_name);
-
-
+    
         if ($this->student_view) {
-            $tmp_user = $tmp_user = new ilObjUser($this->rubric_data['grader'][0]['grader']);
-
+            $tmp_user = new ilObjUser($this->rubric_data['grader'][0]['grader']);
+    
             if (!empty($tmp_user)) {
                 $rubric_heading_tpl->setVariable('RUBRIC_GRADER', ' (' . $this->lng->txt('rubric_graded_by') . ': ' . $tmp_user->getFullname() . ')');
             }
@@ -300,7 +303,7 @@ class ilLPRubricGradeGUI extends ilLPTableBaseGUI
                     </td>";
             }
         } else {
-            if ($locatorArray[$locator] == true) {
+            if (isset($locatorArray[$locator]) && $locatorArray[$locator] == true) {
                 $tmp_write .= "<td class=\"range-flag\" scope=\"rowgroup\">
                         ${behavior['description']}
                     </td>";
@@ -679,6 +682,8 @@ class ilLPRubricGradeGUI extends ilLPTableBaseGUI
 
         $overall_max_points = 0;
         $overall_min_points = 0;
+
+        $history_disabled = '';
 
         if (($this->user_history_id !== 'current' && !is_null($this->user_history_id)) || $this->student_view) {
             $history_disabled = 'disabled';

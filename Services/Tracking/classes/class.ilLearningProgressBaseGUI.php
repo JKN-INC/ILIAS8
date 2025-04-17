@@ -573,8 +573,6 @@ class ilLearningProgressBaseGUI
             // if assignment, updated exc_mem_ass_status
             $obj_type = ilObject::_lookupType($obj_id);
             if ($obj_type == 'exc') {
-                include_once("./Modules/Exercise/classes/class.ilExAssignment.php");
-                include_once("./Modules/Exercise/classes/class.ilExAssignmentMemberStatus.php");
                 // do we have an ass id?
                 $ass_id = 0;
                 if (isset($_GET['ass_id'])) {
@@ -596,7 +594,6 @@ class ilLearningProgressBaseGUI
                 $assignmentMember->setMark($marks->getMark());
                 $assignmentMember->update();
             } else {
-                include_once("./Services/Tracking/classes/class.ilLPStatusWrapper.php");
                 ilLPStatusWrapper::_updateStatus($obj_id, $user_id);
             }
             include_once("./Services/Tracking/classes/class.ilLPStatus.php");

@@ -308,7 +308,7 @@ class ilLPListOfObjectsGUI extends ilLearningProgressBaseGUI
     /**
      *  Save Rubric Grade
      */
-    private function saveRubricGrade(): object | false
+    private function saveRubricGrade(): mixed
     {
         // bring in the rubric card object
         include_once("./Services/Tracking/classes/rubric/class.ilLPRubricGrade.php");

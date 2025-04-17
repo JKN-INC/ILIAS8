@@ -52,7 +52,7 @@ class ilRubricGradeNotification extends ilMailNotification
             $this->appendBody($link);
             $this->getMail()->appendInstallationSignature(true);
 
-            $this->sendMail(array($rcp), array('system'));
+            $this->sendMail(array($rcp), true);
         }
     }
 }
