@@ -11,7 +11,6 @@
  */
 class ilLPRubricCardGUI extends ilLPTableBaseGUI
 {
-    protected $lng;
     protected $tpl;
     protected $rubric_data;
     protected $user_data;
@@ -27,7 +26,6 @@ class ilLPRubricCardGUI extends ilLPTableBaseGUI
     public function __construct()
     {
         global $DIC;
-        $this->lng = $DIC["lng"];
         $this->tpl = $DIC["tpl"];
         $this->user = $DIC->user();
     }

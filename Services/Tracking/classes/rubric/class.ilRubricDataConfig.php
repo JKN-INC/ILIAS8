@@ -114,7 +114,8 @@ class rubricDataConfig extends ActiveRecord {
          * @return string
          * @description Return the Name of your Database Table
          */
-        static function returnDbTableName() {
+        static function returnDbTableName(): string 
+        {
                 return self::TABLE_NAME;
         }
 

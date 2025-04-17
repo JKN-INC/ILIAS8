@@ -9,11 +9,11 @@ class ilRubricGradeNotification extends ilMailNotification
         parent::__construct();
     }
 
-    function setObjId($a_val)
+    function setObjId($a_val): void
     {
         $this->obj_id = $a_val;
     }
-    function getObjId()
+    function getObjId(): int
     {
         return $this->obj_id;
     }
