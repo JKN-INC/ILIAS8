@@ -27,6 +27,7 @@ class ilLPRubricCardGUI extends ilLPTableBaseGUI
     {
         global $DIC;
         $this->tpl = $DIC["tpl"];
+        $this->lng = $DIC["lng"];
         $this->user = $DIC->user();
     }
 
@@ -272,6 +273,8 @@ class ilLPRubricCardGUI extends ilLPTableBaseGUI
     private function buildTemplateCriteria($criteria, $group_increment, $criteria_increment)
     {
         $tmp_criteria_name = 'Criteria_' . $group_increment . '_' . $criteria_increment;
+
+        $tmp_group_name = isset($tmp_group_name) ? $tmp_group_name : 'Default Group Name';
 
         $tmp_write = "<td scope=\"rowgroup\">
                         <div class=\"form-group has-success has-feedback\">

@@ -117,23 +117,25 @@ class ilLPRubricCard
     private function incrementSequence($table)
     {
         $sequence = "";
-
-        //update and get the next sequence
+    
+        // Update and get the next sequence
         $this->ilDB->manipulate("update $table set sequence=sequence+1");
-
-        //what is the current sequence
+    
+        // What is the current sequence
         $set = $this->ilDB->query("select sequence from $table");
         $row = $this->ilDB->fetchAssoc($set);
-        $sequence = $row['sequence'];
-
-        if (empty($sequence)) {
+    
+        if ($row && isset($row['sequence'])) {
+            $sequence = $row['sequence'];
+        } else {
+            // If no sequence exists, initialize it
             $this->ilDB->manipulate("insert into $table (sequence) value (1)");
             $sequence = 1;
         }
-
-        return ($sequence);
+    
+        return $sequence;
     }
-
+    
     private function getCardPostData()
     {
         include_once("./Services/Form/classes/class.ilPropertyFormGUI.php");
@@ -274,6 +276,11 @@ class ilLPRubricCard
             "select locked from rubric where obj_id=" . $this->ilDB->quote($this->obj_id, "integer") . " and deleted is null"
         );
         $row = $res->fetchRow(ilDBConstants::FETCHMODE_OBJECT);
+    
+        if (!$row) {
+            return false; // No matching row found, assume not locked
+        }
+    
         return (is_null($row->locked)) ? false : true;
     }
 
@@ -599,11 +606,11 @@ class ilLPRubricCard
     private function saveRubricWeightTbl($labels, $rubric_group_id, $weights)
     {
         global $DIC;
-        // null out weight for group id
+        // Null out weight for group id
         $this->ilDB->manipulate("update rubric_weight set deleted=NOW() where deleted is null and rubric_group_id=" . $this->ilDB->quote($rubric_group_id, "integer"));
-        //update the weight min/max for this rubric_group_id
+    
+        // Update the weight min/max for this rubric_group_id
         foreach ($labels as $k => $label) {
-
             $set = $this->ilDB->query(
                 "select 
                     rubric_weight_id 
@@ -612,37 +619,36 @@ class ilLPRubricCard
                     rubric_group_id =" . $this->ilDB->quote($rubric_group_id, "integer") . " and 
                     rubric_label_id=" . $this->ilDB->quote($label['rubric_label_id'], "integer")
             );
-
+    
             $broken_weight = explode('-', $weights[$k]);
-
-            if (count($broken_weight) == 1) {
-                $broken_weight[1] = $broken_weight[0];
-            }
-            sort($broken_weight);
-
+    
+            // Ensure both weight_min and weight_max are valid numbers
+            $weight_min = isset($broken_weight[0]) && is_numeric($broken_weight[0]) ? $broken_weight[0] : 0;
+            $weight_max = isset($broken_weight[1]) && is_numeric($broken_weight[1]) ? $broken_weight[1] : $weight_min;
+    
             if ($this->ilDB->numRows($set) > 0) {
                 $row = $this->ilDB->fetchAssoc($set);
-                //update
+                // Update
                 $this->ilDB->manipulate(
                     "update rubric_weight set 
                         deleted=null,
                         last_update=NOW(),
                         owner=" . $this->ilDB->quote($DIC['ilUser']->getId(), "integer") . ",
-                        weight_min=" . $this->ilDB->quote($broken_weight[0], "float") . ",
-                        weight_max=" . $this->ilDB->quote($broken_weight[1], "float") . "
+                        weight_min=" . $this->ilDB->quote($weight_min, "float") . ",
+                        weight_max=" . $this->ilDB->quote($weight_max, "float") . "
                     where rubric_weight_id=" . $this->ilDB->quote($row['rubric_weight_id'], "integer")
                 );
             } else {
-                //insert                            
+                // Insert
                 $new_rubric_weight_id = $this->incrementSequence('rubric_weight_seq');
-
+    
                 $this->ilDB->manipulate(
                     "insert into rubric_weight (rubric_weight_id,rubric_group_id,rubric_label_id,weight_min,weight_max,owner,create_date,last_update) values (
                         " . $this->ilDB->quote($new_rubric_weight_id, "integer") . ",
                         " . $this->ilDB->quote($rubric_group_id, "integer") . ",
                         " . $this->ilDB->quote($label['rubric_label_id'], "text") . ",
-                        " . $this->ilDB->quote($broken_weight[0], "float") . ",
-                        " . $this->ilDB->quote($broken_weight[1], "float") . ",
+                        " . $this->ilDB->quote($weight_min, "float") . ",
+                        " . $this->ilDB->quote($weight_max, "float") . ",
                         " . $this->ilDB->quote($DIC['ilUser']->getId(), "integer") . ",
                         NOW(),
                         NOW()
@@ -722,8 +728,8 @@ class ilLPRubricCard
         //is there a rubric already for this?
         $set = $this->ilDB->query("select rubric_id from rubric where obj_id=" . $this->ilDB->quote($this->obj_id, "integer") . " and deleted is null");
         $row = $this->ilDB->fetchAssoc($set);
-        $this->rubric_id = $row['rubric_id'];
-        $complete = $this->rubric_complete === 'true' ? 1 : 0;
+        $this->rubric_id = $row ? $row['rubric_id'] : null; // Check if $row is null
+        $complete = $this->rubric_complete === 'true' ? 1 : 0;    
         if (empty($this->rubric_id)) {
             $this->rubric_id = $this->incrementSequence('rubric_seq');
         }
