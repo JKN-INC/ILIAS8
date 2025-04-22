@@ -328,6 +328,29 @@ class ilGradebookGradeTotalConfig extends ActiveRecord
     }
 
     /**
+     * @db_has_field    FALSE
+     */
+    protected $recently_created;
+
+    /**
+     * @return mixed
+     */
+    public function getRecentlyCreated()
+    {
+        return $this->recently_created;
+    }
+
+    /**
+     * @param mixed $recently_created
+     */
+    public function setRecentlyCreated($recently_created)
+    {
+        $this->recently_created = $recently_created;
+    }
+
+    
+
+    /**
      * returns an instance of gradebook grade total
      * @param $revision_id
      * @param $usr_id

@@ -104,7 +104,7 @@ class ilLPStatusGradebook extends ilLPStatus
 	 */
 	function determineStatus($a_obj_id, $a_user_id, $a_obj = null): int
 	{
-		$status = self::LP_STATUS_COMPLETED;
+		$status = self::LP_STATUS_COMPLETED_NUM;
 		switch ($this->objectCache->lookupType($a_obj_id)) {
 			case "crs":
 			case "grp":

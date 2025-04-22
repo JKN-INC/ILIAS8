@@ -211,6 +211,10 @@ class ilLPGradebookGradeGUI extends ilLPGradebookGUI
         $tableHTML = '';
 
         foreach ($this->participants_data['user_grades'] as $object) {
+
+            $icon = ilLPStatusIcons::getInstance(ilLPStatusIcons::ICON_VARIANT_LONG);
+            $status_icon = $icon->renderIconForStatus($object['status']);
+
             $tableHTML .= '<tr>';
             $tableHTML .= '<td>' . $object['student_name'] . '</td>';
             $tableHTML .= '<td>' . $object['login'] . '</td>';
@@ -218,7 +222,7 @@ class ilLPGradebookGradeGUI extends ilLPGradebookGUI
             $tableHTML .= '<td>' . $object['overall_grade'] . '%</td>';
             $tableHTML .= '<td>' . $object['adjusted_grade'] . '%</td>';
             $tableHTML .= '<td>' . $object['progress'] . '%</td>';
-            $tableHTML .= '<td><img title="' . ilLearningProgressBaseGUI::_getStatusText($object['status']) . '" alt="' . ilLearningProgressBaseGUI::_getStatusText($object['status']) . '" src="' . ilLearningProgressBaseGUI::_getImagePathForStatus($object['status']) . '"></td>';
+            $tableHTML .= '<td>'. $status_icon .'</td>';
             $tableHTML .= '</tr>';
         }
 
@@ -259,6 +263,10 @@ class ilLPGradebookGradeGUI extends ilLPGradebookGUI
         $tableHTML = '';
 
         foreach ($this->user_grade_data['grade_objects']['object_data'] as $data) {
+
+            $icons = ilLPStatusIcons::getInstance(ilLPStatusIcons::ICON_VARIANT_LONG);
+            $status_icon = $icons->renderIconForStatus($data['status']);
+
             if (!$data['is_gradeable']) {
                 $span = '<span title="Group grade is determined by children" class="obj-learning-progress glyphicon glyphicon-lock" aria-hidden="true"></span></td>';
             } else {
@@ -274,7 +282,7 @@ class ilLPGradebookGradeGUI extends ilLPGradebookGUI
             $tableHTML .= '<td>' . $data['weight'] . '%</td>';
             $tableHTML .= '<td>' . $data['actual'] . '%</td>'; 
             $tableHTML .= '<td>' . $data['adjusted'] . '%</td>';
-            $tableHTML .= '<td><img title="' . ilLearningProgressBaseGUI::_getStatusText($data['status']) . '" alt="' . ilLearningProgressBaseGUI::_getStatusText($data['status']) . '" src="' . ilLearningProgressBaseGUI::_getImagePathForStatus($data['status']) . '"></td>';
+            $tableHTML .= '<td>'.$status_icon.'</td>';
             $tableHTML .= '<td> <img alt="' . $data['type_Alt'] . '" title="' . $data['type_Alt'] . '" src="./templates/default/images/icon_' . $data['type'] . '.svg" class="ilListItemIcon"></td>';
             $tableHTML .= '<td>' . $data['title'] . '</td>';
             $tableHTML .= '<td>' . $data['graded_on'] . '</td>';

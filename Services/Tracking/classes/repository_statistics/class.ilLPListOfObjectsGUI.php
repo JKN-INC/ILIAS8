@@ -509,12 +509,13 @@ class ilLPListOfObjectsGUI extends ilLearningProgressBaseGUI
         } else {
             $this->tpl->addBlockFile('ADM_CONTENT', 'adm_content', 'tpl.lp_loo.html', 'Services/Tracking');
 
+            $print_view = false;
+
             // Show back button
             if (
                 $this->getMode() == self::LP_CONTEXT_PERSONAL_DESKTOP or
                 $this->getMode() == self::LP_CONTEXT_ADMINISTRATION
             ) {
-                $print_view = false;
                 $ilToolbar->addButton(
                     $this->lng->txt('trac_view_list'),
                     $this->ctrl->getLinkTarget($this, 'show')

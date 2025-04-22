@@ -533,7 +533,7 @@ class ilLPGradebookGrade extends ilLPGradebook
      * @param null $usr_id
      * @return array
      */
-    public function getOverallUserGrades($usr_id = NULL)
+    public function getOverallUserGrades($usr_id = NULL): array
     {
         $gradebook_id = $this->getGradebookId();
         require_once('./Services/Tracking/classes/gradebook/config/class.ilGradebookGradeTotalConfig.php');
@@ -553,6 +553,9 @@ class ilLPGradebookGrade extends ilLPGradebook
             $revision = $this->getUsersLatestRevision($member['usr_id']);
             $this->refreshGrades($member['usr_id'], $revision);
             $grades = ilGradebookGradeTotalConfig::firstOrNew($revision->getRevisionId(), $member['usr_id'], $gradebook_id);
+            
+            $icon = ilLPStatusIcons::getInstance(ilLPStatusIcons::ICON_VARIANT_LONG);
+            $img_path = $icon->getImagePathForStatus($grades->getStatus());
 
             $grades_arr[] = [
                 'student_name' => $member['full_name'],
@@ -562,7 +565,7 @@ class ilLPGradebookGrade extends ilLPGradebook
                 'adjusted_grade' => $grades->getAdjustedGrade(),
                 'progress' => $grades->getProgress(),
                 'status' => $grades->getStatus(),
-                'img' => ilLearningProgressBaseGUI::_getImagePathForStatus($grades->getStatus()),
+                'img' => $img_path,
                 'img_Alt' => ilLearningProgressBaseGUI::_getStatusText($grades->getStatus())
             ];
         }
@@ -635,6 +638,9 @@ class ilLPGradebookGrade extends ilLPGradebook
         $object_instance = ilObjectFactory::getInstanceByObjId($revision_object['obj_id']);
         $grades = $this->determineGrade($revision_object, $usr_id);
 
+        $icon = ilLPStatusIcons::getInstance(ilLPStatusIcons::ICON_VARIANT_LONG);
+        $img_path = $icon->getImagePathForStatus($grades['status']);
+
         $arr = [
             'obj_id' => $revision_object['obj_id'],
             'lp_type' => $revision_object['lp_type'],
@@ -650,7 +656,7 @@ class ilLPGradebookGrade extends ilLPGradebook
             'is_gradeable' => $revision_object['is_gradeable'],
             'graded_on' => $grades['graded_on'],
             'graded_by' => $grades['graded_by'],
-            'img' => ilLearningProgressBaseGUI::_getImagePathForStatus($grades['status']),
+            'img' => $img_path,
             'img_Alt' => ilLearningProgressBaseGUI::_getStatusText($grades['status'])
         ];
 
