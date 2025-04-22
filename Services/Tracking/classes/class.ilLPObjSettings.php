@@ -68,6 +68,8 @@ class ilLPObjSettings
 
     public const LP_DEFAULT_VISITS = 30;
     const LP_MODE_RUBRIC = 92;
+     // START PATCH JKN GRADEBOOK
+     const LP_MODE_GRADEBOOK = 93;
 
     protected static array $map = array(
 
@@ -215,6 +217,12 @@ class ilLPObjSettings
         self::LP_MODE_RUBRIC => array('ilLPStatusRubric',
                                       'trac_mode_rubric', 
                                       'trac_mode_rubric_info'
+        )
+
+        , 
+        self::LP_MODE_GRADEBOOK => array('ilLPStatusGradebook',
+                                      'trac_mode_gradebook', 
+                                      'trac_mode_gradebook_info'
         )
 
         ,

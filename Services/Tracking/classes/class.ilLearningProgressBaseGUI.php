@@ -72,6 +72,11 @@ class ilLearningProgressBaseGUI
     protected const LP_ACTIVE_OBJSTATADMIN = 10;
     protected const LP_ACTIVE_MATRIX = 11;
     protected const LP_ACTIVE_RUBRIC = 92;
+     // START PATCH JKN GRADEBOOK
+    protected const LP_ACTIVE_GRADEBOOK = 93;
+    protected const LP_ACTIVE_GRADEBYSTUDENT = 94;
+    protected const LP_ACTIVE_PARTICIPANT = 95;
+     // END PATCH JKN GRADEBOOK
 
     public function __construct(
         int $a_mode,
@@ -275,17 +280,55 @@ class ilLearningProgressBaseGUI
                             );
                         }
 
-                        $this->tabs_gui->addSubTabTarget(
-                            "trac_summary",
-                            $this->ctrl->getLinkTargetByClass(
-                                "illplistofobjectsgui",
-                                'showObjectSummary'
-                            ),
-                            "",
-                            "",
-                            "",
-                            $a_active == self::LP_ACTIVE_SUMMARY
-                        );
+                        // START PATCH JKN GRADEBOOK
+                        if ($olp->getCurrentMode() != 93) {
+                            //Only Show Matrix if Not Gradebook. (EJ)
+                            $this->tabs_gui->addSubTabTarget(
+                                "trac_matrix",
+                                $this->ctrl->getLinkTargetByClass("illplistofobjectsgui", 'showUserObjectMatrix'),
+                                "",
+                                "",
+                                "",
+                                $a_active == self::LP_ACTIVE_MATRIX
+                            );
+                        }
+
+                        // START PATCH JKN GRADEBOOK
+                        if ($olp->getCurrentMode() == 93) {
+                            global $ilUser;
+                            //if the user is a course admin or course tutor give them
+                            // the weight and course particpants subtab.
+                            $crs_members = ilCourseParticipants::_getInstanceByObjId($this->getObjId());
+                            if ($crs_members->isAdmin($ilUser->getId()) || $crs_members->isTutor($ilUser->getId())) {
+                                //weighting view
+                                $this->tabs_gui->addSubTabTarget(
+                                    "trac_gradebook",
+                                    $this->ctrl->getLinkTargetByClass("illplistofobjectsgui", 'showGradebookWeight'),
+                                    "",
+                                    "",
+                                    "",
+                                    $a_active == self::LP_ACTIVE_GRADEBOOK
+                                );
+                            }
+                            $this->tabs_gui->addSubTabTarget(
+                                "trac_gradebook_gradebystudent",
+                                $this->ctrl->getLinkTargetByClass("illplistofobjectsgui", 'showGradebookStudentGrade'),
+                                "",
+                                "",
+                                "",
+                                $a_active == self::LP_ACTIVE_GRADEBYSTUDENT
+                            );
+                        } else {
+                            $this->tabs_gui->addSubTabTarget(
+                                "trac_summary",
+                                $this->ctrl->getLinkTargetByClass("illplistofobjectsgui", 'showObjectSummary'),
+                                "",
+                                "",
+                                "",
+                                $a_active == self::LP_ACTIVE_SUMMARY
+                            );
+                        }
+                        // END PATCH GRADEBOOK CPKN
                     }
                 }
                 if (!($olp instanceof ilPluginLP) &&

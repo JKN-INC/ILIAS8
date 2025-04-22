@@ -95,3 +95,27 @@ $rubricLock = new rubricGradeLockConfig();
 $rubricLock->installDB();
     
 ?>
+<#2>
+<?php
+
+require_once('./Services/Tracking/classes/gradebook/config/class.ilGradebookConfig.php');
+$ilGradebookConfig = new ilGradebookConfig();
+$ilGradebookConfig->installDB();
+
+require_once('./Services/Tracking/classes/gradebook/config/class.ilGradebookGradesConfig.php');
+$ilGradebookGradesConfig = new ilGradebookGradesConfig();
+$ilGradebookGradesConfig->installDB();
+
+require_once('./Services/Tracking/classes/gradebook/config/class.ilGradebookGradeTotalConfig.php');
+$ilGradebookGradeTotalConfig = new ilGradebookGradeTotalConfig();
+$ilGradebookGradeTotalConfig->installDB();
+
+require_once('./Services/Tracking/classes/gradebook/config/class.ilGradebookObjectsConfig.php');
+$ilGradebookObjectsConfig = new ilGradebookObjectsConfig();
+$ilGradebookObjectsConfig->installDB();
+
+require_once('./Services/Tracking/classes/gradebook/config/class.ilGradebookRevisionConfig.php');
+$ilGradebookRevisionConfig = new ilGradebookRevisionConfig();
+$ilGradebookRevisionConfig->installDB();
+
+?>
