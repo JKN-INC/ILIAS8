@@ -71,6 +71,7 @@ class ilLearningProgressBaseGUI
     protected const LP_ACTIVE_OBJSTATDAILY = 9;
     protected const LP_ACTIVE_OBJSTATADMIN = 10;
     protected const LP_ACTIVE_MATRIX = 11;
+    protected const LP_ACTIVE_RUBRIC = 92;
 
     public function __construct(
         int $a_mode,
@@ -203,6 +204,19 @@ class ilLearningProgressBaseGUI
                         'read_learning_progress',
                         $this->getRefId()
                     );
+
+                    if ( $olp->getCurrentMode() == self::LP_ACTIVE_RUBRIC
+                        && ilLearningProgressAccess::checkPermission('edit_learning_progress', $this->getRefId())
+                    ) {
+                        $this->tabs_gui->addSubTabTarget(
+                            "trac_rubric",
+                            $this->ctrl->getLinkTargetByClass("illplistofobjectsgui", 'showRubricCardForm'),
+                            "",
+                            "",
+                            "",
+                            $a_active == self::LP_ACTIVE_RUBRIC
+                        );
+                    }
 
                     if ($this->isAnonymized() || !$has_read) {
                         $this->ctrl->setParameterByClass(
@@ -502,7 +516,7 @@ class ilLearningProgressBaseGUI
             }
         }
 
-        if (strlen($comment = ilLPMarks::_lookupComment($user_id, $item_id))) {
+        if (strlen($comment = ilLPMarks::_lookupComment($user_id, $item_id) && $olp->getCurrentMode() !== self::LP_ACTIVE_RUBRIC)) {
             $info->addProperty($this->lng->txt('trac_comment'), $comment);
         }
 
@@ -535,6 +549,58 @@ class ilLearningProgressBaseGUI
                         $progress['spent_seconds']
                     )
                 );
+            }
+        }
+    }
+
+    /**
+     * Update a User's Rubric. (JKN Patch.)
+     * @param $user_id
+     * @param $obj_id
+     * @param $passing_grade_minimum
+     */
+    function __updateUserRubric($user_id, $obj_id, $passing_grade_minimum): void
+    {
+        $form = $this->initEditUserForm($user_id, $obj_id);
+        if ($form->checkInput()) {
+            include_once 'Services/Tracking/classes/class.ilLPMarks.php';
+            $marks = new ilLPMarks($obj_id, $user_id);
+            $marks->setMark($form->getInput("mark"));
+            $marks->setComment($form->getInput("comment"));
+            $marks->setCompleted(1);
+            $do_lp = true;
+            $marks->update();
+            // if assignment, updated exc_mem_ass_status
+            $obj_type = ilObject::_lookupType($obj_id);
+            if ($obj_type == 'exc') {
+                // do we have an ass id?
+                $ass_id = 0;
+                if (isset($_GET['ass_id'])) {
+                    // yes, came from submission and grades
+                    $ass_id = $_GET['ass_id'];
+                    $assignmentMember = new ilExAssignmentMemberStatus($ass_id, $user_id);
+                } else {
+                    // no, we need to get it
+                    $ass_ids = ilExAssignment::getAssignmentDataOfExercise($obj_id);
+                    $ass_id = $ass_ids[0];
+                    $assignmentMember = new ilExAssignmentMemberStatus($ass_id['id'], $user_id);
+                }
+
+                if ($marks->getMark() >= $passing_grade_minimum) {
+                    $assignmentMember->setStatus('passed');
+                } else {
+                    $assignmentMember->setStatus('failed');
+                }
+                $assignmentMember->setMark($marks->getMark());
+                $assignmentMember->update();
+            } else {
+                ilLPStatusWrapper::_updateStatus($obj_id, $user_id);
+            }
+            include_once("./Services/Tracking/classes/class.ilLPStatus.php");
+            if ($marks->getMark() >= $passing_grade_minimum) {
+                ilLPStatus::writeStatus($obj_id, $user_id, ilLPStatus::LP_STATUS_COMPLETED_NUM, false, true);
+            } else {
+                ilLPStatus::writeStatus($obj_id, $user_id, ilLPStatus::LP_STATUS_FAILED_NUM, false, true);
             }
         }
     }
