@@ -205,7 +205,7 @@ class ilLearningProgressBaseGUI
                         $this->getRefId()
                     );
 
-                    if ( $olp->getCurrentMode() == 92
+                    if ( $olp->getCurrentMode() == self::LP_ACTIVE_RUBRIC
                         && ilLearningProgressAccess::checkPermission('edit_learning_progress', $this->getRefId())
                     ) {
                         $this->tabs_gui->addSubTabTarget(
@@ -516,7 +516,7 @@ class ilLearningProgressBaseGUI
             }
         }
 
-        if (strlen($comment = ilLPMarks::_lookupComment($user_id, $item_id) && $olp->getCurrentMode() !== 92)) {
+        if (strlen($comment = ilLPMarks::_lookupComment($user_id, $item_id) && $olp->getCurrentMode() !== self::LP_ACTIVE_RUBRIC)) {
             $info->addProperty($this->lng->txt('trac_comment'), $comment);
         }
 
