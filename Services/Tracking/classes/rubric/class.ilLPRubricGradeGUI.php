@@ -293,7 +293,7 @@ class ilLPRubricGradeGUI extends ilLPTableBaseGUI
     {
         $tmp_write = "";
         if ($this->student_view) {
-            if ($locatorArray[$locator] == true && !$this->incomplete) {
+            if (isset($locatorArray[$locator]) && $locatorArray[$locator] == true && !$this->incomplete) {
                 $tmp_write .= "<td class=\"range-flag\" scope=\"rowgroup\">
                         ${behavior['description']}
                     </td>";
