@@ -242,7 +242,9 @@ class ilPasswordAssistanceGUI implements ilCtrlSecurityInterface
             $defaultAuth = $GLOBALS['DIC']['ilSetting']->get('auth_mode');
         }
 
-        $assistance_callback = function () use ($form, $defaultAuth): void {
+        $userExists = false;
+
+        $assistance_callback = function () use ($form, $defaultAuth, &$userExists): void {
             $username = trim($form->getInput('username'));
             $email = trim($form->getInput('email'));
 
@@ -300,6 +302,7 @@ class ilPasswordAssistanceGUI implements ilCtrlSecurityInterface
                     $email
                 ));
             } else {
+                $userExists = true;
                 $this->sendPasswordAssistanceMail($user);
             }
         };
@@ -311,10 +314,21 @@ class ilPasswordAssistanceGUI implements ilCtrlSecurityInterface
             $status = $assistance_callback();
         }
 
-        $this->showMessageForm(
-            sprintf($this->lng->txt('pwassist_mail_sent'), $form->getInput('email')),
-            self::PERMANENT_LINK_TARGET_PW
-        );
+        if($userExists)
+        {
+            $this->showMessageForm(
+                sprintf($this->lng->txt('pwassist_mail_sent_generic'), $form->getInput('email')),
+                self::PERMANENT_LINK_TARGET_PW
+            );
+        }
+        else 
+        {
+            $this->showMessageForm(
+                sprintf($this->lng->txt('pwassist_unknown_username_or_email'), $form->getInput('username'), $form->getInput('email')),
+                self::PERMANENT_LINK_TARGET_PW
+            );
+        }
+
     }
 
     /**
