@@ -19,13 +19,23 @@ switch ($_POST['action'])
         }
         break;
     case "getGradesForUser":
-        try{
+        try {
+
+            if (!isset($_POST['usr_id']) || !isset($_POST['ref_id'])) {
+                throw new Exception("No students");
+            }
+    
             $obj_id = ilObject::_lookupObjectId($_POST['ref_id']);
             $gradebookObj = new ilLPGradebookGrade($obj_id);
             $result = $gradebookObj->getUsersGrades($_POST['usr_id']);
-            echo json_encode(['status'=>'success','data'=>$result]);
-        }catch(Exception $e){
-            echo json_encode(['status'=>'failure','message'=>$e->getMessage()]);
+            echo json_encode(['status' => 'success', 'data' => $result]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'status' => 'failure',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
         }
         break;
     case "saveUsersGrades":

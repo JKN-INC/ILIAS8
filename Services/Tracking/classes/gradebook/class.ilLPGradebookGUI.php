@@ -32,6 +32,8 @@ abstract class ilLPGradebookGUI extends ilLPTableBaseGUI
     protected function buildGradebookVersionsOptions()
     {
         $revision_txt = '';
+        $selected = null; // Initialize with a default value
+        
         if (empty($this->versions)) {
             return '<option>' . 'No Current Existing Gradebooks' . '</option>';
         }

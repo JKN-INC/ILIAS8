@@ -461,8 +461,9 @@ class ilLPListOfObjectsGUI extends ilLearningProgressBaseGUI
         $gradebookObj = new ilLPGradebookWeight($this->getObjId());
         $gradebookGui = new ilLPGradebookWeightGUI();
         $gradebookGui->setVersions($gradebookObj->getGradebookVersions());
-        $course_structure = $gradebookObj->getInitialCourseStructure($this->getObjId(), $_POST['revision_id']);
-        $gradebookGui->setRevisionId($_POST['revision_id']);
+        $revision_id = $_POST['revision_id'] ?? null; // Check if 'revision_id' exists
+        $course_structure = $gradebookObj->getInitialCourseStructure($this->getObjId(), $revision_id);
+        $gradebookGui->setRevisionId($revision_id);
         $gradebookGui->setGradebookData($course_structure);
         $gradebookGui->view();
     }

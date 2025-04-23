@@ -81,6 +81,9 @@ class ilLPGradebookWeightGUI extends ilLPGradebookGUI
         $sortableIndex = 1;
         
         $gradeBookHTML = $this->makeList($this->gradebook_data, $sortableIndex);
+
+        $passing_grade = 0; // Initialize with a default value
+
         if(!is_null($this->revision_id)) {
            foreach ($this->versions as $version) {
                 if ($version->getRevisionId() == $this->revision_id) {

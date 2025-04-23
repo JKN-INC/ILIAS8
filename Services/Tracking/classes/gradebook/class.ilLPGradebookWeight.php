@@ -60,7 +60,11 @@ class ilLPGradebookWeight extends ilLPGradebook
         usort($nodes, function ($a, $b) use ($revision_objects) {
             $a_key = $this->searchForObjId($a['obj_id'], $revision_objects);
             $b_key = $this->searchForObjId($b['obj_id'], $revision_objects);
-            return $revision_objects[$a_key]['placement_order'] - $revision_objects[$b_key]['placement_order'];
+        
+            $a_order = isset($revision_objects[$a_key]) ? $revision_objects[$a_key]['placement_order'] : PHP_INT_MAX;
+            $b_order = isset($revision_objects[$b_key]) ? $revision_objects[$b_key]['placement_order'] : PHP_INT_MAX;
+        
+            return $a_order - $b_order;
         });
 
         foreach ($nodes as $k => $node) {
@@ -86,7 +90,30 @@ class ilLPGradebookWeight extends ilLPGradebook
     private function mapNodeData($node, $revision_objects)
     {
         $key = $this->searchForObjId($node['obj_id'], $revision_objects);
-        $data =  [
+
+        // Check if the key is valid
+        if ($key === null || !isset($revision_objects[$key])) {
+            // Handle the missing key case (e.g., log an error or provide default values)
+            error_log("Missing revision object for obj_id: " . $node['obj_id']);
+            return [
+                'obj_id' => $node['obj_id'],
+                'tree_id' => $node['tree'],
+                'has_lp' => null,
+                'title' => $node['title'],
+                'color' => null,
+                'position' => null,
+                'type' => $node['type'],
+                'type_Alt' => $this->lng->txt($node['type']),
+                'placement_depth' => null,
+                'parent_id' => $node['parent'],
+                'toggle' => null,
+                'weight' => null,
+                'url' => null,
+            ];
+        }
+    
+        // Proceed with valid key
+        $data = [
             'obj_id' => $node['obj_id'],
             'tree_id' => $node['tree'],
             'has_lp' => $revision_objects[$key]['lp_type'],
@@ -101,6 +128,7 @@ class ilLPGradebookWeight extends ilLPGradebook
             'weight' => $revision_objects[$key]['object_weight'],
             'url' => $this->getLPUrlForObjId($revision_objects[$key]['obj_id']),
         ];
+    
         return $data;
     }
 

@@ -88,7 +88,7 @@ $(function() {
                             tbody += '<td>'+((this.adjusted) ? this.adjusted : '')+'</td>';
 
                             tbody += '<td>';
-                            tbody += '<img src="'+this.img+'"/>';
+                            tbody += '<img src="'+this.img+'" class="ilListItemIcon"/>';
                             tbody += '<select '+( this.lp_type == 0 ? 'disabled' : '' )+' class="obj-status form-control pull-right">';
                             tbody += "<option value='0' "+(this.status == 0 ? "selected='selected'" : '')+">Not Attempted</option>";
                             tbody += "<option value='1' "+(this.status == 1 ? "selected='selected'" : '')+">In Progress</option>";

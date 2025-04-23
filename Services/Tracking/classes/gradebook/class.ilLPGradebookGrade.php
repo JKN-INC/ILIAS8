@@ -23,15 +23,24 @@ class ilLPGradebookGrade extends ilLPGradebook
     public function getUsersGrades($usr_id)
     {
         $lastest_revision = $this->getUsersLatestRevision($usr_id);
-        //if a users groups are all set up properly move on and get their course layout.
-
+    
         if ($lastest_revision->getRevisionId() !== NULL) {
             if ($this->userGroupCheck($usr_id, $lastest_revision)) {
                 $course_layout = $this->getUsersCourseLayout($usr_id, $lastest_revision);
-                $users_grade_data = [];
+    
+                if (!is_array($course_layout)) {
+                    throw new Exception('Invalid course layout data');
+                }
+    
+                $users_grade_data = [
+                    'object_data' => [],
+                    'overall_data' => []
+                ];
+    
                 foreach ($course_layout as $key => $revision_object) {
                     $users_grade_data['object_data'][] = $this->mapGradeData($revision_object, $usr_id);
                 }
+    
                 $users_grade_data['overall_data'] = $this->getOverallUserGrades($usr_id);
                 return $users_grade_data;
             }
@@ -484,6 +493,11 @@ class ilLPGradebookGrade extends ilLPGradebook
                 'deleted' => null
             ])->getArray());
 
+            if ($gradebook_grade === null) {
+                // Handle the null case
+                return 0; // Or any default status value
+            }
+
             $status = $gradebook_grade['status'];
         }
         return $status;
@@ -582,6 +596,10 @@ class ilLPGradebookGrade extends ilLPGradebook
     private function determineGrade($revision_object, $usr_id)
     {
         require_once('./Services/Tracking/classes/gradebook/config/class.ilGradebookGradesConfig.php');
+        
+        if (!isset($revision_object['lp_type'], $revision_object['obj_id'])) {
+            throw new Exception('Invalid revision object in determineGrade: ' . json_encode($revision_object));
+        }
 
         $data = [];
     
@@ -615,6 +633,17 @@ class ilLPGradebookGrade extends ilLPGradebook
                 'deleted' => null
             ])
                 ->getArray());
+                
+            if ($gradebook_grade === null) {
+                // Handle the null case
+                return [
+                    'status' => 0,
+                    'actual' => 'N/A',
+                    'adjusted' => 'N/A',
+                    'graded_on' => 'N/A',
+                    'graded_by' => 'N/A'
+                ];
+            }
 
             $username = ilObjUser::_lookupName($gradebook_grade['owner']);
             $data = [
@@ -635,12 +664,19 @@ class ilLPGradebookGrade extends ilLPGradebook
      */
     private function mapGradeData($revision_object, $usr_id)
     {
+        if (!isset($revision_object['obj_id'], $revision_object['lp_type'], $revision_object['is_gradeable'])) {
+            throw new Exception('Invalid revision object structure: ' . json_encode($revision_object));
+        }
+    
         $object_instance = ilObjectFactory::getInstanceByObjId($revision_object['obj_id']);
         $grades = $this->determineGrade($revision_object, $usr_id);
-
-        $icon = ilLPStatusIcons::getInstance(ilLPStatusIcons::ICON_VARIANT_LONG);
-        $img_path = $icon->getImagePathForStatus($grades['status']);
-
+    
+        // Ensure status is an integer
+        $status = $grades['status'] ?? 0;
+    
+        $icon = ilLPStatusIcons::getInstance(ilLPStatusIcons::ICON_VARIANT_SHORT);
+        $img_path = $icon->getImagePathForStatus((int) $status);
+    
         $arr = [
             'obj_id' => $revision_object['obj_id'],
             'lp_type' => $revision_object['lp_type'],
@@ -657,9 +693,9 @@ class ilLPGradebookGrade extends ilLPGradebook
             'graded_on' => $grades['graded_on'],
             'graded_by' => $grades['graded_by'],
             'img' => $img_path,
-            'img_Alt' => ilLearningProgressBaseGUI::_getStatusText($grades['status'])
+            'img_Alt' => ilLearningProgressBaseGUI::_getStatusText($status)
         ];
-
+    
         return $arr;
     }
 
