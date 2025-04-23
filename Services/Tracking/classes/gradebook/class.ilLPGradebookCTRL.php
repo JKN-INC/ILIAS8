@@ -42,10 +42,16 @@ switch ($_POST['action'])
         try{
             $obj_id = ilObject::_lookupObjectId($_POST['ref_id']);
             $gradebookObj = new ilLPGradebookGrade($obj_id);
-            $result = $gradebookObj->saveUsersGrades($_POST['user_id'],$_POST['grades'],$_POST['overall_status']);
-            echo json_encode(['status'=>'success','data'=>$result]);
+    
+            $result = $gradebookObj->saveUsersGrades($_POST['user_id'], $_POST['grades']);
+            echo json_encode(['status' => 'success', 'data' => $result]);
         }catch(Exception $e){
-            echo json_encode(['status'=>'failure','message'=>$e->getMessage()]);
+            echo json_encode([
+                'status' => 'failure',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
         }
         break;
     case "updateStatus":

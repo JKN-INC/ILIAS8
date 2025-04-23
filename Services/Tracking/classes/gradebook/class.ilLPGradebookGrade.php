@@ -332,10 +332,14 @@ class ilLPGradebookGrade extends ilLPGradebook
                 'deleted' => null
             ])->getArray());
 
-            //if 0 and not completed, or null. Assume 100% for now.    
-            $adjusted = (($gradebook_grade['actual_grade'] == 0 && !in_array((int)$gradebook_grade['status'], [2, 3])) ||
-                is_null($gradebook_grade['actual_grade']))
-                ? 100 * ($revision_object['object_weight'] * 0.01) : $gradebook_grade['adjusted_grade'];
+            if (is_null($gradebook_grade)) {
+                // Default to 100% if no gradebook grade is found
+                $adjusted = 100 * ($revision_object['object_weight'] * 0.01);
+            } else {
+                $adjusted = (($gradebook_grade['actual_grade'] == 0 && !in_array((int)$gradebook_grade['status'], [2, 3])) ||
+                    is_null($gradebook_grade['actual_grade']))
+                    ? 100 * ($revision_object['object_weight'] * 0.01) : $gradebook_grade['adjusted_grade'];
+            }
         }
 
         return $adjusted;
@@ -397,13 +401,15 @@ class ilLPGradebookGrade extends ilLPGradebook
         $object_grades = [];
         foreach ($grade_objects as $object) {
             $grade = $this->determineGrade($object, $usr_id);
-            //now if the child is a group. check if they're a member.
+            $adjusted_grade = $grade['adjusted'] ?? 0; // Default to 0 if 'adjusted' key is missing
+    
+            // Now if the child is a group, check if they're a member
             if ($object['object_data_type'] == 'grp') {
                 if ($this->isMember($object['obj_id'], $usr_id)) {
-                    array_push($object_grades, $grade['adjusted']);
+                    array_push($object_grades, $adjusted_grade);
                 }
             } else {
-                array_push($object_grades, $grade['adjusted']);
+                array_push($object_grades, $adjusted_grade);
             }
         }
         return $object_grades;
@@ -419,55 +425,50 @@ class ilLPGradebookGrade extends ilLPGradebook
     private function saveGrade($gradebook_object, $usr_id, $actual_grade, $status)
     {
         global $ilUser;
-
+    
         require_once('./Services/Tracking/classes/gradebook/config/class.ilGradebookGradesConfig.php');
         $gradebook_id = $this->getGradebookId();
-
+    
         $gradebook_grade = ilGradebookGradesConfig::firstOrNew(
             $gradebook_object['revision_id'],
             $gradebook_object['id'],
             $usr_id
         );
-
-        $adjusted_grade = (int)$actual_grade * ($gradebook_object['object_weight'] * 0.01);
-
-        //determine whether we should update or not.
+    
+        // Ensure actual_grade is numeric or default to 0
+        $actual_grade = is_numeric($actual_grade) ? (float)$actual_grade : 0;
+    
+        $adjusted_grade = $actual_grade * ($gradebook_object['object_weight'] * 0.01);
+    
+        // Determine whether we should update or not
         $update = false;
-
+    
         if ($gradebook_grade) {
-            //if any of the parameters changed we should update it, if status was pushed in as null, we know it came from a group update, so don't update it.
+            // Check if any parameters have changed
             if (
-                (int) $gradebook_grade->getActualGrade() !== (int) $actual_grade
-                || (int)$gradebook_grade->getAdjustedGrade() !== (int) $adjusted_grade
-                || ((int)$gradebook_grade->getStatus() !== (int)$status && !is_null($status))
+                (int)$gradebook_grade->getActualGrade() !== (int)$actual_grade ||
+                (int)$gradebook_grade->getAdjustedGrade() !== (int)$adjusted_grade ||
+                ((int)$gradebook_grade->getStatus() !== (int)$status && !is_null($status))
             ) {
                 $update = true;
             }
         }
-  
     
-
         $gradebook_grade->setGradebookId($gradebook_id);
-        if (!empty($actual_grade) || (int)$actual_grade === 0) {
-            $gradebook_grade->setActualGrade($actual_grade);
-        }
+        $gradebook_grade->setActualGrade($actual_grade);
         $gradebook_grade->setAdjustedGrade($adjusted_grade);
-
+    
         if (!is_null($status)) {
             $gradebook_grade->setStatus($status);
         }
-       
+    
         if ($gradebook_grade->getRecentlyCreated()) {
-            if($actual_grade !== '') {
+            if ($actual_grade !== '') {
                 $gradebook_grade->setLastUpdate(date("Y-m-d H:i:s"));
                 $gradebook_grade->save();
             }
         } else {
             if ($update) {
-                if ($revision_object['lp_type'] !== 0) {
-                    $gradebook_grade->setLastUpdate(date("Y-m-d H:i:s"));
-                    $gradebook_grade->setOwner($ilUser->getId());
-                }
                 $gradebook_grade->update();
             }
         }
@@ -636,13 +637,7 @@ class ilLPGradebookGrade extends ilLPGradebook
                 
             if ($gradebook_grade === null) {
                 // Handle the null case
-                return [
-                    'status' => 0,
-                    'actual' => 'N/A',
-                    'adjusted' => 'N/A',
-                    'graded_on' => 'N/A',
-                    'graded_by' => 'N/A'
-                ];
+                return [];
             }
 
             $username = ilObjUser::_lookupName($gradebook_grade['owner']);
@@ -686,12 +681,12 @@ class ilLPGradebookGrade extends ilLPGradebook
             'type_Alt' => $this->lng->txt($object_instance->getType()),
             'title' => $object_instance->getTitle(),
             'url' => $this->getLPUrlForObjId($revision_object['obj_id']),
-            'actual' => $grades['actual'],
-            'adjusted' => $grades['adjusted'],
-            'status' => $grades['status'],
+            'actual' => $grades['actual'] ?? null, 
+            'adjusted' => $grades['adjusted'] ?? null,
+            'status' => $grades['status'] ?? null, 
             'is_gradeable' => $revision_object['is_gradeable'],
-            'graded_on' => $grades['graded_on'],
-            'graded_by' => $grades['graded_by'],
+            'graded_on' => $grades['graded_on'] ?? null, 
+            'graded_by' => $grades['graded_by'] ?? null, 
             'img' => $img_path,
             'img_Alt' => ilLearningProgressBaseGUI::_getStatusText($status)
         ];
