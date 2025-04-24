@@ -449,32 +449,91 @@ class ilLPListOfObjectsGUI extends ilLearningProgressBaseGUI
         $obj_gui->showRubricGradeForm($_REQUEST['grader_history']);
     }
 
+    // START PATCH JKN GRADEBOOK
+    /**
+     * Show Gradebook Weighting Form
+     */
+    public function showGradebookWeight(): void
+    {
+        global $tpl;
+        include_once("./Services/Tracking/classes/gradebook/class.ilLPGradebookWeightGUI.php");
+        include_once("./Services/Tracking/classes/gradebook/class.ilLPGradebookWeight.php");
+        $gradebookObj = new ilLPGradebookWeight($this->getObjId());
+        $gradebookGui = new ilLPGradebookWeightGUI();
+        $gradebookGui->setVersions($gradebookObj->getGradebookVersions());
+        $revision_id = $_POST['revision_id'] ?? null; // Check if 'revision_id' exists
+        $course_structure = $gradebookObj->getInitialCourseStructure($this->getObjId(), $revision_id);
+        $gradebookGui->setRevisionId($revision_id);
+        $gradebookGui->setGradebookData($course_structure);
+        $gradebookGui->view();
+    }
+
+    /**
+     * Show Gradebook Grade By Student Form
+     */
+    public function showGradebookStudentGrade(): void
+    {
+        global $tpl;
+        include_once("./Services/Tracking/classes/gradebook/class.ilLPGradebookGradeGUI.php");
+        include_once("./Services/Tracking/classes/gradebook/class.ilLPGradebookGrade.php");
+        $gradebookObj = new ilLPGradebookGrade($this->getObjId());
+        $gradebookGui = new ilLPGradebookGradeGUI();
+        $gradebookGui->setParticipants($gradebookObj->getCourseMembers());
+        $gradebookGui->setVersions($gradebookObj->getGradebookVersions());
+        $gradebookGui->view();
+    }
+
+    /**
+     * Show Gradebook Course Participant
+     */
+    public function showGradebookCourseParticipants(): void
+    {
+        global $tpl;
+        include_once("./Services/Tracking/classes/gradebook/class.ilLPGradebookGradeGUI.php");
+        include_once("./Services/Tracking/classes/gradebook/class.ilLPGradebookGrade.php");
+        $gradebookObj = new ilLPGradebookGrade($this->getObjId());
+        $gradebookGui = new ilLPGradebookGradeGUI();
+        $gradebookGui->setParticipantsData($gradebookObj->getCourseParticipantsData());
+        $gradebookGui->courseParticipants();
+    }
+    // END PATCH JKN GRADEBOOK
+
     public function details(): void
     {
-        $this->tpl->addBlockFile(
-            'ADM_CONTENT',
-            'adm_content',
-            'tpl.lp_loo.html',
-            'Services/Tracking'
-        );
+        global $DIC;
 
-        // Show back button
-        if ($this->getMode() == self::LP_CONTEXT_PERSONAL_DESKTOP or
-            $this->getMode() == self::LP_CONTEXT_ADMINISTRATION) {
-            $this->toolbar->addButton(
-                $this->lng->txt('trac_view_list'),
-                $this->ctrl->getLinkTarget($this, 'show')
-            );
-        }
+        $ilToolbar = $DIC['ilToolbar'];
 
-        $info = new ilInfoScreenGUI($this);
-        $info->setFormAction($this->ctrl->getFormAction($this));
-        if ($this->__showObjectDetails($info, $this->details_obj_id)) {
-            $this->tpl->setCurrentBlock("info");
-            $this->tpl->setVariable("INFO_TABLE", $info->getHTML());
-            $this->tpl->parseCurrentBlock();
+        //START PATCH JKN GRADEBOOK
+        if ($this->details_mode == 93) {
+            $this->showGradebookCourseParticipants();
+        } else {
+            $this->tpl->addBlockFile('ADM_CONTENT', 'adm_content', 'tpl.lp_loo.html', 'Services/Tracking');
+
+            $print_view = false;
+
+            // Show back button
+            if (
+                $this->getMode() == self::LP_CONTEXT_PERSONAL_DESKTOP or
+                $this->getMode() == self::LP_CONTEXT_ADMINISTRATION
+            ) {
+                $ilToolbar->addButton(
+                    $this->lng->txt('trac_view_list'),
+                    $this->ctrl->getLinkTarget($this, 'show')
+                );
+            }
+
+            $info = new ilInfoScreenGUI($this);
+            $info->setFormAction($this->ctrl->getFormAction($this));
+            if ($this->__showObjectDetails($info, $this->details_obj_id)) {
+                $this->tpl->setCurrentBlock("info");
+                $this->tpl->setVariable("INFO_TABLE", $info->getHTML());
+                $this->tpl->parseCurrentBlock();
+            }
+
+            $this->__showUsersList($print_view);
         }
-        $this->__showUsersList();
+        //END PATCH JKN GRADEBOOK
     }
 
     public function __showUsersList($a_print_view = false): void
