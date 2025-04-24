@@ -856,6 +856,9 @@ class assTextQuestion extends assQuestion implements ilObjQuestionScoringAdjusta
         $result['nr_of_tries'] = $this->getNrOfTries();
         $result['shuffle'] = $this->getShuffle();
         $result['maxlength'] = $this->getMaxNumOfChars();
+        // JKN PATCH START
+        $result['mobs'] = [];
+        // JKN PATCH END
         return json_encode($result);
     }
 
