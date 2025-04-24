@@ -71,6 +71,10 @@ class ilSCORM2004TrackingItemsPerUserFilterGUI extends ilPropertyFormGUI
             $options = array("-1" => $lng->txt("no_items"));
         }
 
+        // JKN PATCH START
+        asort($options);
+        // JKN PATCH END
+
         $si = new ilSelectInputGUI($lng->txt("user"), "userSelected");
         $si->setOptions($options);
         $si->setValue($userSelected);
