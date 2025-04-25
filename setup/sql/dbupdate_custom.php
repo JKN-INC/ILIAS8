@@ -119,3 +119,11 @@ $ilGradebookRevisionConfig = new ilGradebookRevisionConfig();
 $ilGradebookRevisionConfig->installDB();
 
 ?>
+<#3>
+<?php
+
+#adds an 'alternate spellings' field to the glossary term table, this allows you to do
+#multiple spellings for one term linked back in a SAHS: EG inspection, inspections.
+$ilDB->addTableColumn('glossary_term', 'alternates', array("type" => "text", "length" => 1000));
+
+?>

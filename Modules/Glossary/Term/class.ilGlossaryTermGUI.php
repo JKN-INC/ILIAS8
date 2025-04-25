@@ -180,10 +180,20 @@ class ilGlossaryTermGUI
         $term->setValue($this->term->getTerm());
         $form->addItem($term);
 
+         // JKN PATCH START
+         $alternates = new ilTextInputGUI($this->lng->txt("cont_alternates"), "alternates");
+         $alternates->setRequired(false);
+         $alternates->setValue($this->term->getAlternates());
+         $form->addItem($alternates);
+         // JKN PATCH END
+
         $lang = new ilSelectInputGUI($this->lng->txt("language"), "term_language");
         $lang->setRequired(true);
         $lang->setOptions(ilMDLanguageItem::_getLanguages());
         $lang->setValue($this->term->getLanguage());
+        // JKN PATCH START
+        $this->term->setAlternates($this->term->getAlternates());
+        // JKN PATCH END
         $form->addItem($lang);
 
         // taxonomy
@@ -225,6 +235,15 @@ class ilGlossaryTermGUI
             // update term
             $this->term->setTerm($form->getInput("term"));
             $this->term->setLanguage($form->getInput("term_language"));
+
+            // JKN PATCH START
+            $alternates = [];
+            foreach (explode(",", $form->getInput("alternates")) as $alt) {
+                $alternates[] = trim(ilUtil::stripSlashes($alt));
+            }
+            $this->term->setAlternates(implode(",", $alternates));
+            // JKN PATCH END
+
             $this->term->update();
 
             // update taxonomy assignment
