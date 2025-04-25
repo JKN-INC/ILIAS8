@@ -33,7 +33,7 @@ class ilGlossaryTerm
     public int $glo_id = 0;
     public string $import_id = "";
     // JKN PATCH END
-    public $alternates;
+    public string $alternates;
     // JKN PATCH END
 
     public function __construct(int $a_id = 0)
