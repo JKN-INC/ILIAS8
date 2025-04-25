@@ -537,13 +537,15 @@ class ilSoapObjectAdministration extends ilSoapAdministration
             return $this->raiseError("Parent with ID $a_target_id has been deleted.", 'Client');
         }
 
-        $allowed_types = array('root', 'cat', 'grp', 'crs', 'fold');
+        // JKN PATCH START
+        $allowed_types = array('root','cat','grp','crs','fold','orgu');
         if (!in_array($target_obj->getType(), $allowed_types)) {
             return $this->raiseError(
-                'No valid target type. Target must be reference id of "course, group, category or folder"',
+                'No valid target type. Target must be reference id of "course, group, category, organization or folder"',
                 'Client'
             );
         }
+        // JKN PATCH END
 
         $allowed_subtypes = $target_obj->getPossibleSubObjects();
         $allowed = [];
@@ -1267,13 +1269,15 @@ class ilSoapObjectAdministration extends ilSoapAdministration
         $objDefinition = $DIC['objDefinition'];
         $rbacsystem = $DIC['rbacsystem'];
 
-        $allowed_types = array('root', 'cat', 'grp', 'crs', 'fold');
+        // JKN PATCH START
+        $allowed_types = array('root','cat','grp','crs','fold','orgu');
         if (!in_array($target_type, $allowed_types, true)) {
             return $this->raiseError(
-                'No valid target type. Target must be reference id of "course, group, category or folder"',
+                'No valid target type. Target must be reference id of "course, group, category, organization or folder"',
                 'Client'
             );
         }
+        // JKN PATCH END
 
         $allowed_subtypes = $objDefinition->getSubObjects($target_type);
         $allowed = array();
@@ -1309,7 +1313,7 @@ class ilSoapObjectAdministration extends ilSoapAdministration
         if ($a_action === 'create') {
             if (count($a_object_data['references']) > 1 && in_array(
                 $a_object_data['type'],
-                ['cat', 'crs', 'grp', 'fold'],
+                ['cat', 'crs', 'grp', 'fold','orgu'],
                 true
             )) {
                 return $this->raiseError(
