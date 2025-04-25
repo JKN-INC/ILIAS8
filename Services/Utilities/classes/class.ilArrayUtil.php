@@ -139,6 +139,11 @@ class ilArrayUtil
             $array_sortby = 0;
         }
 
+        // JKN PATCH START
+        $left[$array_sortby] = iconv('UTF-8', 'ASCII//TRANSLIT', $left[$array_sortby]);
+        $right[$array_sortby] = iconv('UTF-8', 'ASCII//TRANSLIT', $right[$array_sortby]);
+        // JKN PATCH END
+
         $leftValue = (string) ($left[$array_sortby] ?? '');
         $rightValue = (string) ($right[$array_sortby] ?? '');
 
