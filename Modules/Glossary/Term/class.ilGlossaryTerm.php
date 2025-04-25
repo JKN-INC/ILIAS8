@@ -32,6 +32,9 @@ class ilGlossaryTerm
     public string $language = "";
     public int $glo_id = 0;
     public string $import_id = "";
+    // JKN PATCH END
+    public $alternates;
+    // JKN PATCH END
 
     public function __construct(int $a_id = 0)
     {
@@ -63,6 +66,9 @@ class ilGlossaryTerm
         $this->setTerm((string) $term_rec["term"]);
         $this->setImportId((string) $term_rec["import_id"]);
         $this->setLanguage((string) $term_rec["language"]);
+        // JKN PATCH START
+        $this->setAlternates($term_rec["alternates"]);
+        // JKN PATCH END
         $this->setGlossaryId((int) $term_rec["glo_id"]);
     }
 
@@ -180,6 +186,26 @@ class ilGlossaryTerm
         return $this->import_id;
     }
 
+    // JKN PATCH START
+
+    /**
+     * @return mixed
+     */
+    public function getAlternates()
+    {
+        return $this->alternates;
+    }
+
+    /**
+     * @param mixed $alternates
+     */
+    public function setAlternates($alternates)
+    {
+        $this->alternates = $alternates;
+    }
+
+    // JKN PATCH END
+
     public function create(): void
     {
         $ilDB = $this->db;
@@ -224,6 +250,9 @@ class ilGlossaryTerm
         $ilDB->manipulate("UPDATE glossary_term SET " .
             " glo_id = " . $ilDB->quote($this->getGlossaryId(), "integer") . ", " .
             " term = " . $ilDB->quote($this->getTerm(), "text") . ", " .
+            // JKN PATCH START
+            " alternates = " . $ilDB->quote($this->getAlternates(), "text") . ", " .
+            // JKN PATCH END
             " import_id = " . $ilDB->quote($this->getImportId(), "text") . ", " .
             " language = " . $ilDB->quote($this->getLanguage(), "text") . ", " .
             " last_update = " . $ilDB->now() . " " .
@@ -368,16 +397,24 @@ class ilGlossaryTerm
         $where .= $in;
 
 
-        $q = "SELECT DISTINCT(gt.term), gt.id, gt.glo_id, gt.language FROM glossary_term gt " . $join . " WHERE " . $where . $searchterm . " ORDER BY term";
+        // JKN PATCH START
+        $q = "SELECT DISTINCT(gt.term), gt.id, gt.glo_id, gt.language, gt.alternates FROM glossary_term gt " . $join . " WHERE " . $where . $searchterm . " ORDER BY term";
+        // JKN PATCH END
 
         //echo $q; exit;
 
         $term_set = $ilDB->query($q);
         $glo_ids = array();
         while ($term_rec = $ilDB->fetchAssoc($term_set)) {
+            // JKN PATCH START
+            $alternates = array_filter(explode(",", $term_rec['alternates']));
             $terms[] = array("term" => $term_rec["term"],
-                "language" => $term_rec["language"], "id" => $term_rec["id"], "glo_id" => $term_rec["glo_id"]);
-            $glo_ids[] = $term_rec["glo_id"];
+            "language" => $term_rec["language"], 
+            "id" => $term_rec["id"], 
+            "glo_id" => $term_rec["glo_id"],
+            "alternates" => $alternates
+            );
+            // JKN PATCH END
         }
 
         // add advanced metadata

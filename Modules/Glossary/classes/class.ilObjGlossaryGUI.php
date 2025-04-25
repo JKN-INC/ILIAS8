@@ -770,6 +770,16 @@ class ilObjGlossaryGUI extends ilObjectGUI
 
         $this->term_manager->setSessionLang($lang);
 
+        // JKN PATCH START
+         //auto update the linked learning modules to the glossary..
+         $linked_lms = ilObjGlossary::lookUpLinkedContentPages($this->object->getId());
+         foreach($linked_lms as $linked_lm){
+             $content_object = new ilObjLearningModule($linked_lm, false);
+             $content_object->unLinkGlossaryTerms($this->object->getRefId());
+             $content_object->autoLinkGlossaryTerms($this->object->getRefId());
+         }
+        // JKN PATCH END
+
         // add first definition
         $def = new ilGlossaryDefinition();
         $def->setTermId($term->getId());
@@ -987,6 +997,25 @@ class ilObjGlossaryGUI extends ilObjectGUI
     {
         $ids = $this->edit_request->getIds();
         foreach ($ids as $id) {
+
+            // JKN PATCH START
+            //auto update the linked learning modules to the glossary.
+            $term = new ilGlossaryTerm($id);
+            $single_term = [
+                'term' => $term->getTerm(),
+                'language' => $term->getLanguage(),
+                'id' => $term->getId(),
+                'glo_id' => $term->getGlossaryId()
+            ];
+
+            $linked_lms = ilObjGlossary::lookUpLinkedContentPages($this->object->getId());
+
+            foreach($linked_lms as $linked_lm){
+                $content_object = new ilObjLearningModule($linked_lm, false);
+                $content_object->unLinkGlossaryTerm($single_term);
+            }
+            // JKN PATCH END
+
             if (ilGlossaryTermReferences::isReferenced([$this->object->getId()], $id)) {
                 $refs = new ilGlossaryTermReferences($this->object->getId());
                 $refs->deleteTerm($id);
@@ -1402,6 +1431,10 @@ class ilObjGlossaryGUI extends ilObjectGUI
     {
         $this->object->removeAutoGlossary($this->edit_request->getGlossaryId());
         $this->object->update();
+
+        // JKN PATCH START
+        $this->object->unLinkGlossaryTerms((int)$_GET["glo_ref_id"]);
+        // JKN PATCH END
 
         $this->tpl->setOnScreenMessage('success', $this->lng->txt("msg_obj_modified"), true);
         $this->ctrl->redirect($this, "editGlossaries");
