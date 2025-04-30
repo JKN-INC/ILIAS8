@@ -171,6 +171,9 @@ class ilOrgUnitUserAssignmentGUI extends BaseCommands
 
     protected function delete(): void
     {
+        // JKN PATCH START
+        global $DIC;
+        $ilAppEventHandler = $DIC['ilAppEventHandler'];
         $params = $this->http->request()->getQueryParams();
         $usr_id = $_POST['usr_id'];
         $position_id = $params['position_id'];
@@ -181,8 +184,13 @@ class ilOrgUnitUserAssignmentGUI extends BaseCommands
             $this->getParentRefId()
         );
         $ua->delete();
+        $ilAppEventHandler->raise("Modules/Orgunit", "removeFromOrg", array(
+            "usr_id" => $_POST['usr_id'],
+            "orgu_ref_id" => $this->getParentRefId()
+        ));
         $this->main_tpl->setOnScreenMessage('success', $this->language->txt('remove_successful'), true);
         $this->cancel();
+        // JKN PATCH END
     }
 
     protected function deleteRecursive()

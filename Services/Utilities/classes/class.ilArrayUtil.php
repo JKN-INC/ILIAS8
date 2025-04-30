@@ -139,8 +139,10 @@ class ilArrayUtil
             $array_sortby = 0;
         }
 
-        $leftValue = (string) ($left[$array_sortby] ?? '');
-        $rightValue = (string) ($right[$array_sortby] ?? '');
+        // JKN PATCH START
+        $leftValue = isset($left[$array_sortby]) ? iconv('UTF-8', 'ASCII//TRANSLIT', $left[$array_sortby]) : '';
+        $rightValue = isset($right[$array_sortby]) ? iconv('UTF-8', 'ASCII//TRANSLIT', $right[$array_sortby]) : '';
+        // JKN PATCH END
 
         // this comparison should give optimal results if
         // locale is provided and mb string functions are supported
