@@ -90,36 +90,22 @@ class ilAccessibilitySupportContactsGUI implements ilCtrlBaseClassInterface
         return implode(",", $logins);
     }
 
+    // JKN PATCH START
     public static function getFooterLink(): string
     {
         global $DIC;
 
-        $ctrl = $DIC->ctrl();
-        $user = $DIC->user();
         $http = $DIC->http();
-        $lng = $DIC->language();
-        $rbac_system = $DIC->rbac()->system();
-
-        $contacts = ilAccessibilitySupportContacts::getValidSupportContactIds();
-        if (count($contacts) > 0) {
-            if ($rbac_system->checkAccess("internal_mail", ilMailGlobalServices::getMailObjectRefId())) {
-                return $ctrl->getLinkTargetByClass("ilaccessibilitysupportcontactsgui", "");
-            } else {
-                $mails = ilLegacyFormElementsUtil::prepareFormOutput(
-                    ilAccessibilitySupportContacts::getMailsToAddress()
-                );
-                $request_scheme =
-                    isset($http->request()->getServerParams()["HTTPS"])
-                    && $http->request()->getServerParams()["HTTPS"] !== "off"
-                        ? "https" : "http";
-                $url = $request_scheme . "://"
-                    . $http->request()->getServerParams()["HTTP_HOST"]
-                    . $http->request()->getServerParams()["REQUEST_URI"];
-                return "mailto:" . $mails . "?body=%0D%0A%0D%0A" . $lng->txt("report_accessibility_link_mailto") . "%0A" . rawurlencode($url);
-            }
-        }
-        return "";
+        $request_scheme =
+            isset($http->request()->getServerParams()['HTTPS'])
+            && $http->request()->getServerParams()['HTTPS'] !== 'off'
+            ? 'https' : 'http';
+        $url = $request_scheme . '://'
+            . $http->request()->getServerParams()['HTTP_HOST']
+            . $http->request()->getServerParams()['REQUEST_URI'];
+        return "mailto:support@cpkn.ca?subject=Support%20Request&body=*%20*%20*%0D%0A" . CLIENT_ID . "%0A" . rawurlencode($url);
     }
+    // JKN PATCH END
 
     public static function getFooterText(): string
     {
