@@ -483,6 +483,9 @@ class ilUserProfile
         $ilSetting = $DIC['ilSetting'];
         $lng = $DIC['lng'];
         $rbacreview = $DIC['rbacreview'];
+        // JKN PATCH START
+        $ilUser = $DIC['ilUser'];
+        // JKN PATCH END
 
         $registration_settings = null;
 
@@ -593,7 +596,9 @@ class ilUserProfile
                         $bi = new ilBirthdayInputGUI($lng->txt($lv), "usr_" . $f);
                         $date = null;
                         if ($a_user && strlen($a_user->$m())) {
-                            $date = new ilDateTime($a_user->$m(), IL_CAL_DATE);
+                            // JKN PATCH START
+                            $date = new ilDate($a_user->$m(), IL_CAL_DATE);
+                            // JKN PATCH END
                             $bi->setDate($date);
                         }
                         $bi->setRequired((bool) $ilSetting->get("require_" . $f));
