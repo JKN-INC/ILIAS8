@@ -941,7 +941,7 @@ class ilCtrl implements ilCtrlInterface
             throw $exception;
         }
 
-        $base_class = $path->getBaseClass();
+        $base_class = $path->getBaseClass(); 
         if (null === $base_class) {
             throw new ilCtrlException("Cannot find a valid baseclass in the cid path '{$path->getCidPath()}'");
         }
