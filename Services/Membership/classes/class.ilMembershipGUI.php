@@ -677,9 +677,7 @@ class ilMembershipGUI
                 $this->getMembersObject()->updateContact($usr_id, false);
             }
 
-            // JKN PATCH START
-            $this->updateLPFromStatus($usr_id, $status);
-            // JKN PATCH END
+            $this->updateLPFromStatus($usr_id, in_array($usr_id, $passed));
         }
         $this->tpl->setOnScreenMessage('success', $this->lng->txt("msg_obj_modified"), true);
         $this->ctrl->redirect($this, "participants");
