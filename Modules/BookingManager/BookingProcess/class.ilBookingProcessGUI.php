@@ -990,12 +990,38 @@ class ilBookingProcessGUI
         int $a_obj_id,
         array $a_rsv_ids = null
     ): void {
+
+         // JKN PATCH START
+         global $DIC;
+         $ilAppEventHandler = $DIC['ilAppEventHandler'];
+         $ilAppEventHandler->raise(
+             "Modules/BookingManager",
+             'participantBooked', [
+                 'obj_id' => $a_obj_id,
+                 'usr_id' => $this->user_id_to_book
+             ]
+         );
+         // JKN PATCH END
+
         $this->tpl->setOnScreenMessage('success', $this->lng->txt('book_reservation_confirmed'), true);
 
         // show post booking information?
         $obj = new ilBookingObject($a_obj_id);
         $pfile = $obj->getPostFile();
         $ptext = $obj->getPostText();
+
+
+        // JKN PATCH START
+        $ilAppEventHandler->raise(
+            "Modules/BookingManager",
+            'participantBooked', [
+                'obj_id' => $a_obj_id,
+                'usr_id' => $this->user_id_to_book,
+                'ref_id' => $this->pool->getRefId(),
+                'a_rsv_ids' => $a_rsv_ids
+            ]
+        );
+        // JKN PATCH END
 
         if (trim($ptext) || $pfile) {
             if (count($a_rsv_ids)) {
