@@ -583,8 +583,6 @@ class ilLMPageObject extends ilLMObject
 
         $ilDB = $DIC->database();
 
-        dd($a_lang);
-
         // count query
         $count_query = "SELECT count(pq.question_id) cnt ";
 
