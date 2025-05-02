@@ -497,6 +497,11 @@ class ilMembershipGUI
                 )
             );
         }
+        // JKN PATCH START
+        $statuses = (array) isset($_POST['status']) ? $_POST['status'] : [];
+        $status = ilLPStatus::LP_STATUS_NOT_ATTEMPTED_NUM;
+        // JKN PATCH END
+
         if ($this->http->wrapper()->post()->has('passed')) {
             $passed = $this->http->wrapper()->post()->retrieve(
                 'passed',
@@ -630,7 +635,33 @@ class ilMembershipGUI
             }
 
             if ($this instanceof ilCourseMembershipGUI) {
-                $this->getMembersObject()->updatePassed($usr_id, in_array($usr_id, $passed), true);
+                // JKN PATCH START
+                // if a course membership (manual by tutor) update.
+                if($statuses[$usr_id]){
+                    switch($statuses[$usr_id]){
+                        case ilLPStatus::LP_STATUS_FAILED:
+                            $status = ilLPStatus::LP_STATUS_FAILED_NUM;
+                            $this->getMembersObject()->updateFailed($usr_id, true, true);
+                            break;
+                        case ilLPStatus::LP_STATUS_COMPLETED:
+                            $status = ilLPStatus::LP_STATUS_COMPLETED_NUM;
+                            $this->getMembersObject()->updatePassed($usr_id, true, true);
+                            break;
+                        case ilLPStatus::LP_STATUS_NOT_ATTEMPTED:
+                            include_once './Services/Tracking/classes/class.ilChangeEvent.php';
+                            ilChangeEvent::_deleteReadEventsForUsers($this->getParentObject()->getId(),[$usr_id]);
+                            break;
+                        case ilLPStatus::LP_STATUS_IN_PROGRESS:
+                            ilChangeEvent::_recordReadEvent(
+                                $this->getParentObject()->getType(),
+                                $this->getParentObject()->getRefId(),
+                                $this->getParentObject()->getId(),
+                                $usr_id
+                            );
+                            break;
+                    }
+                }
+                // JKN PATCH END
                 $this->getMembersObject()->sendNotification(
                     ilCourseMembershipMailNotification::TYPE_STATUS_CHANGED,
                     $usr_id

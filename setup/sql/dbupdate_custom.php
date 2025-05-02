@@ -127,3 +127,9 @@ $ilGradebookRevisionConfig->installDB();
 $ilDB->addTableColumn('glossary_term', 'alternates', array("type" => "text", "length" => 1000));
 
 ?>
+<#4>
+<?php
+
+$ilDB->query("ALTER TABLE obj_members ADD COLUMN IF NOT EXISTS `failed` TINYINT(4) DEFAULT NULL");
+
+?>
