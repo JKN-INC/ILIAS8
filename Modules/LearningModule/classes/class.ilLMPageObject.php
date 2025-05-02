@@ -583,6 +583,8 @@ class ilLMPageObject extends ilLMObject
 
         $ilDB = $DIC->database();
 
+        dd($a_lang);
+
         // count query
         $count_query = "SELECT count(pq.question_id) cnt ";
 
@@ -591,7 +593,7 @@ class ilLMPageObject extends ilLMObject
 
         $from = " FROM page_question pq JOIN lm_tree t ON (t.lm_id = " . $ilDB->quote($a_lm_id, "integer") .
             " AND pq.page_id = t.child and pq.page_parent_type = " . $ilDB->quote("lm", "text") . ") " .
-            " WHERE t.lm_id = " . $ilDB->quote($a_lm_id, "integer");
+            "WHERE t.lm_id = " . $ilDB->quote($a_lm_id, "integer") . " AND pq.page_lang = " . $ilDB->quote($a_lang, "text");
         $count_query .= $from;
         $query .= $from;
 
