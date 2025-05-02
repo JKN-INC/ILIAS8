@@ -197,11 +197,13 @@ final class SVGBlacklistPreProcessor implements PreProcessor
 
     private function hasContentScriptTag(string $raw_svg_content): bool
     {
-        // Check for Base64 encoded Content
-        if (preg_match(self::REGEX_BASE64, $raw_svg_content)) {
-            $this->rejection_message .= ' ' . $this->rejection_message_base64;
-            return true;
-        }
+        // JKN PATCH START
+        // // Check for Base64 encoded Content
+        // if (preg_match(self::REGEX_BASE64, $raw_svg_content)) {
+        //     $this->rejection_message .= ' ' . $this->rejection_message_base64;
+        //     return true;
+        // }
+        // JKN PATCH END
 
         // Check for script tags directly
         if (preg_match(self::REGEX_SCRIPT, $raw_svg_content)) {
