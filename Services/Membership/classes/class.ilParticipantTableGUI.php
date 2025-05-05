@@ -83,6 +83,15 @@ abstract class ilParticipantTableGUI extends ilTable2GUI
             $org->setOptions($options);
             $this->current_filter['org_units'] = $org->getValue();
         }
+
+        $active = $this->addFilterItemByMetaType(
+            'active',
+            ilTable2GUI::FILTER_CHECKBOX,
+            false,
+            $this->lng->txt('active_filter')
+        );
+
+        $this->current_filter['active'] = $active->getChecked();
     }
 
     public function getSelectableColumns(): array
