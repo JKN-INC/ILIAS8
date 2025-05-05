@@ -8267,7 +8267,7 @@ dateplaner#:#cal_ms_users_responsible#:#Responsables utilisateurs
 dateplaner#:#cal_new_app#:#Nouvel évènement
 dateplaner#:#cal_new_ms#:#Nouvelle tâche
 dateplaner#:#cal_no_ending#:#Aucune date de fin
-dateplaner#:#cal_no_events_block#:#Es sind keine Termine für Sie vorhanden.
+dateplaner#:#cal_no_events_block#:#Aucune date n'est disponible pour vous.
 dateplaner#:#cal_no_events_info#:#Aucun évènement trouvé pour la période sélectionnée.
 dateplaner#:#cal_no_recurrence#:#Aucune répétition
 dateplaner#:#cal_notification#:#Message de Notification
@@ -14282,7 +14282,7 @@ rep#:#rep_intro3#:#Cliquer sur le bouton <i>%s</i> à  côté de la liste de sé
 rep#:#rep_intro4#:#Dans le formulaire suivant, saisir un titre et une description, et cliquez sur  <i>%s</i>.
 rep#:#rep_intro5#:#En cliquant sur le titre de la catégorie, vous entrez à l'intérieur de celle-ci.
 rep#:#rep_intro6#:#Après ces opérations, vous pourrez ajouter toutes les ressources que vous souhaitez à votre catégorie.
-rep#:#rep_mo_mem_dash#:#Sie sind aktuell noch nicht Mitglied eines Kurses oder einer Gruppe.
+rep#:#rep_mo_mem_dash#:#Vous n'êtes actuellement pas encore membre d'un cours ou d'un groupe.
 rep#:#rep_multiple_reference_deletion_instruction#:#Veuillez sélectionner celles que vous souhaitez aussi supprimer :
 rep#:#rep_multiple_reference_deletion_intro#:#D'autres références existent pour cet objet.
 rep#:#rep_new_item_group_add#:#Ajouter Groupe
@@ -16315,7 +16315,7 @@ tagging#:#tagging_users_using_tag#:#Utilisateurs utilisant Tag
 task#:#task_deadline#:#Fin
 task#:#task_derived_tasks#:#Tâches
 task#:#task_details#:#Details
-task#:#task_no_task_items#:#Es sind keine To-Dos für Sie vorhanden.
+task#:#task_no_task_items#:#Il n'y a aucune tâche pour vous.
 task#:#task_no_tasks#:#You do not have any open tasks.
 task#:#task_start#:#Début
 task#:#task_task#:#Task
