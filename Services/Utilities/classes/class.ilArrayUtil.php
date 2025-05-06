@@ -140,8 +140,13 @@ class ilArrayUtil
         }
 
         // JKN PATCH START
-        $leftValue = isset($left[$array_sortby]) ? iconv('UTF-8', 'ASCII//TRANSLIT', $left[$array_sortby]) : '';
-        $rightValue = isset($right[$array_sortby]) ? iconv('UTF-8', 'ASCII//TRANSLIT', $right[$array_sortby]) : '';
+        $leftValue = isset($left[$array_sortby]) && is_string($left[$array_sortby])
+            ? iconv('UTF-8', 'ASCII//TRANSLIT', $left[$array_sortby])
+            : '';
+
+        $rightValue = isset($right[$array_sortby]) && is_string($right[$array_sortby])
+            ? iconv('UTF-8', 'ASCII//TRANSLIT', $right[$array_sortby])
+            : '';
         // JKN PATCH END
 
         // this comparison should give optimal results if
