@@ -40,13 +40,16 @@ class ilUIFilterService
     protected ilUIService $service;
     protected UIServices $ui;
     protected ilUIFilterServiceSessionGateway $session;
+    protected ilSetting $settings;
     protected ilUIFilterRequestAdapter $request;
 
     public function __construct(ilUIService $service, ilUIServiceDependencies $deps)
     {
+        global $DIC;
         $this->service = $service;
         $this->session = $deps->getSession();
         $this->request = $deps->getRequest();
+        $this->settings = $DIC->settings();
         $this->ui = $deps->ui();
     }
 
@@ -111,11 +114,20 @@ class ilUIFilterService
         }
 
         // get the filter
+            // Need to actually grab the asynch setting from repo so 
+        // we can pass to the check in get action
+        $asynch = $this->settings->get("item_cmd_asynch");
+        if($asynch === 1){
+            $non_asynch = false;
+        }else{
+            $non_asynch = true;
+        }
+
         $filter = $ui->input()->container()->filter()->standard(
-            $this->request->getAction($base_action, self::CMD_TOGGLE_ON, true),
-            $this->request->getAction($base_action, self::CMD_TOGGLE_OFF, true),
-            $this->request->getAction($base_action, self::CMD_EXPAND),
-            $this->request->getAction($base_action, self::CMD_COLLAPSE),
+            $this->request->getAction($base_action, self::CMD_TOGGLE_ON, $non_asynch),
+            $this->request->getAction($base_action, self::CMD_TOGGLE_OFF, $non_asynch),
+            $this->request->getAction($base_action, self::CMD_EXPAND, $non_asynch),
+            $this->request->getAction($base_action, self::CMD_COLLAPSE, $non_asynch),
             $this->request->getAction($base_action, self::CMD_APPLY, true),
             $this->request->getAction($base_action, self::CMD_RESET, true),
             $inputs_with_session_data,
