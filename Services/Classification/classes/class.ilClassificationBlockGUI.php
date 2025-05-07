@@ -206,6 +206,7 @@ class ilClassificationBlockGUI extends ilBlockGUI
         $tpl = $this->main_tpl;
 
         $this->initProviders();
+        $presentation = ilContainer::_lookupContainerSetting($this->parent_obj_id, "list_presentation");
 
         // empty selection is invalid
         if ($this->repo->isEmpty()) {
@@ -344,21 +345,33 @@ class ilClassificationBlockGUI extends ilBlockGUI
             }
         }
 
-        // if nothing has been selected reload to category page
-        if ($no_provider) {
+        //The presentation was always serving list view so if tiles, just do the refresh instead of the ajax rendering. 
+        if($presentation === 'tile'){
+            // if nothing has been selected reload to category page
+            if (!$has_content && !$no_provider ) {
+                echo ilUtil::getSystemMessageHTML($lng->txt("clsfct_content_no_match"), "info");
+            }
             echo "<span id='block_" . $this->getBlockType() . "_0_loader'></span>";
             echo "<script>il.Classification.returnToParent();</script>";
             exit();
         }
+        else{
+            // if nothing has been selected reload to category page
+            if ($no_provider) {
+                echo "<span id='block_" . $this->getBlockType() . "_0_loader'></span>";
+                echo "<script>il.Classification.returnToParent();</script>";
+                exit();
+            }
 
-        if ($has_content) {
-            echo $ltpl->get();
-        } else {
-            //$content_block->setContent($lng->txt("clsfct_content_no_match"));
-            echo ilUtil::getSystemMessageHTML($lng->txt("clsfct_content_no_match"), "info");
+            if ($has_content) {
+                echo $ltpl->get();
+            } else {
+                //$content_block->setContent($lng->txt("clsfct_content_no_match"));
+                echo ilUtil::getSystemMessageHTML($lng->txt("clsfct_content_no_match"), "info");
+            }
+
+            exit();
         }
-
-        exit();
     }
 
     protected function initProviders(bool $a_check_post = false): void
