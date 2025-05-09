@@ -157,9 +157,22 @@ class ilObjCourseReference extends ilContainerReference
      */
     public function cloneObject(int $a_target_id, int $a_copy_id = 0, bool $a_omit_tree = false): ?ilObject
     {
+        global $DIC;
+        $ilLog = $DIC["ilLog"];
+        $ilLog->write("ilObjCourseReference::cloneObject(), start");
+
         $new_obj = parent::cloneObject($a_target_id, $a_copy_id, $a_omit_tree);
         $new_obj->enableMemberUpdate($this->isMemberUpdateEnabled());
         $new_obj->update();
+        $newID = $new_obj->getId();
+
+        $id = $this->getId();
+        $ilLog->write("ilObjCourseReference::cloneObject(), Copying id settings:");
+        $ilLog->write($id);
+
+        $obj_settings = new ilLPObjSettings($id);
+        $obj_settings->cloneSettings($newID);
+        $ilLog->write("ilObjCourseReference::cloneObject(), Finishing.");
         return $new_obj;
     }
 }
