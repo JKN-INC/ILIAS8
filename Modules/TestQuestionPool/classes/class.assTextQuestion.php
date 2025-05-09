@@ -873,6 +873,10 @@ class assTextQuestion extends assQuestion implements ilObjQuestionScoringAdjusta
         ];
         $result['max_points'] = $this->getMaximumPoints();
         $result['relation'] = (string) $this->getKeywordRelation();
+        //if multiple tries, get the hint feedback too.
+        if((int) $this->getNrOfTries() > 0 ){
+            $result['feedback']['tries'] = $this->feedbackOBJ->getGenericFeedbackTestPresentation($this->getId(),'hint');
+        }
         $result['mobs'] = [];
         // JKN PATCH END
         $result['maxlength'] = $this->getMaxNumOfChars();
