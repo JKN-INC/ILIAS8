@@ -1,4 +1,4 @@
-// Build: 2023416234957 
+// Build: 2025507160453 
 /*
 	+-----------------------------------------------------------------------------+
 	| ILIAS open source                                                           |
@@ -12140,6 +12140,12 @@ function sendAndLoad(url, data, callback, user, password, headers)
 function sendJSONRequest (url, data, callback, user, password, headers) 
 {
 	function unloadChrome() {
+
+		//CPKN Patch for Safari page unload in Courses.
+		if (navigator.userAgent.indexOf("Safari") > -1) {
+			return true;
+		}
+		
 		if (navigator.userAgent.indexOf("Chrom") > -1) {
 			if (
                    (
