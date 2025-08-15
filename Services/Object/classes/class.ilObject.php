@@ -596,7 +596,9 @@ class ilObject
         ;
         $obj_set = $this->db->query($sql);
         $obj_rec = $this->db->fetchAssoc($obj_set);
-        $this->last_update = $obj_rec["last_update"];
+
+        $this->last_update = $obj_rec["last_update"] ?? "";
+       
 
         if ($this->obj_definition->isRBACObject($this->getType())) {
             // Update long description
