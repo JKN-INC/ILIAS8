@@ -860,12 +860,15 @@ class ilContainer extends ilObject
         $ret = parent::update();
 
         $log = ilLoggerFactory::getLogger("cont");
-        $log->debug("**5**" . count($this->getObjectTranslation()->getLanguages()));
+        $objTrans = $this->getObjectTranslation();
+        $log->debug("**5**" . (is_object($objTrans) ? count($objTrans->getLanguages()) : 0));
 
-        $trans = $this->getObjectTranslation();
-        $trans->setDefaultTitle($this->getTitle());
-        $trans->setDefaultDescription($this->getLongDescription());
-        $trans->save();
+        $trans = $objTrans;
+        if ($trans !== null) {
+            $trans->setDefaultTitle($this->getTitle());
+            $trans->setDefaultDescription($this->getLongDescription());
+            $trans->save();
+        }
 
         $log = ilLoggerFactory::getLogger("cont");
         $log->debug(":::::::::::::::::::::::::::");
