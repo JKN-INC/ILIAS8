@@ -596,7 +596,8 @@ class ilObject
         ;
         $obj_set = $this->db->query($sql);
         $obj_rec = $this->db->fetchAssoc($obj_set);
-        $this->last_update = $obj_rec["last_update"];
+
+        $this->last_update = $obj_rec["last_update"] ?? "";
 
         if ($this->obj_definition->isRBACObject($this->getType())) {
             // Update long description
@@ -1665,7 +1666,7 @@ class ilObject
 
         $other_children_of_same_type = $this->tree->getChildsByType($target_id, $this->type);
 
-        if ($obj_translations->getLanguages() === []) {
+        if ($obj_translations === null || $obj_translations->getLanguages() === []) {
             $existing_titles = array_map(
                 fn (array $child): string => $child['title'],
                 $other_children_of_same_type
