@@ -51,7 +51,7 @@ class ilObjSCORM2004LearningModule extends ilObjSCORMLearningModule
         $this->db = $DIC->database();
         $this->log = ilLoggerFactory::getLogger('sc13');
         $this->user = $DIC->user();
-        $this->tabs = $DIC->tabs();
+        $this->tabs = $DIC['ilTabs'];
         $this->type = "sahs";
         parent::__construct($a_id, $a_call_by_reference);
     }
