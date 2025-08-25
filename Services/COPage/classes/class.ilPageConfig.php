@@ -317,7 +317,8 @@ abstract class ilPageConfig
 
     public function getPreventHTMLUnmasking(): bool
     {
-        return true;
+        // Allow HTML to always be rendered in page content
+        return false;
     }
 
     public function setEnableSelfAssessment(
