@@ -3436,6 +3436,7 @@ common#:#activate_https#:#HTTPS handling by ILIAS<br />(Login)
 common#:#activate_tracking#:#Activation
 common#:#activation#:#Edit Timings
 common#:#active#:#Active
+common#:#active_filter#:#Active Users Only
 common#:#add#:#Add
 common#:#add_condition#:#Add Precondition
 common#:#add_entry#:#Add/Edit entry

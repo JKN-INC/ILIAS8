@@ -178,6 +178,15 @@ class ilTrMatrixTableGUI extends ilLPTableBaseGUI
             $this->filter["name"] = null;
             $this->setFilterValue($item, '');
         }
+
+        $active = $this->addFilterItemByMetaType(
+            'active',
+            ilTable2GUI::FILTER_CHECKBOX,
+            false,
+            $this->lng->txt('active_filter')
+        );
+
+        $this->filter['active'] = $active->getChecked();
     }
 
     public function numericOrdering($a_field): bool
@@ -364,6 +373,7 @@ class ilTrMatrixTableGUI extends ilLPTableBaseGUI
                 $this->ref_id,
                 $collection["object_ids"],
                 $this->filter["name"] ?? '',
+                $this->filter["active"],
                 $a_user_fields,
                 $a_privary_fields,
                 $check_agreement

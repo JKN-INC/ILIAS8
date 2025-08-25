@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 /**
  * This file is part of ILIAS, a powerful learning management system
@@ -742,6 +742,12 @@ class ilLPTableBaseGUI extends ilTable2GUI
                                 -8
                             ) . "23:59:59";
                         }
+                    }
+                    break;
+
+                case "active":
+                    if($value){
+                        $result[$id] = 1;
                     }
                     break;
             }

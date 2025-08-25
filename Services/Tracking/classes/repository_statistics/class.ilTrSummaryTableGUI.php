@@ -444,6 +444,15 @@ class ilTrSummaryTableGUI extends ilLPTableBaseGUI
             true
         );
         $this->filter["registration"] = $item->getDate();
+
+        $active = $this->addFilterItemByMetaType(
+            'active',
+            ilTable2GUI::FILTER_CHECKBOX,
+            false,
+            $this->lng->txt('active_filter')
+        );
+
+        $this->filter['active'] = $active->getChecked();
     }
 
     public function getSelCountryCodes(): array
