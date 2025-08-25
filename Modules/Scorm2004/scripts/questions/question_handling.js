@@ -933,12 +933,18 @@ ilias.questions.showFeedback = function(a_id) {
 
 			if (ilias.questions.default_feedback)
 			{
+				if(questions[a_id].feedback['tries']){
+					txt_wrong_answers = questions[a_id].feedback['tries'];
+				}
+
 				fbtext = txt_wrong_answers + '<br />' + ilias.questions.txt.tries_remaining + ': '+ rem + "<br />";
 			}
 
 			if (questions[a_id].feedback['onenotcorrect'] && rem === 0 )
 			{
-				fbtext += questions[a_id].feedback['onenotcorrect'];
+				if(!questions[a_id].feedback['tries']) {
+					fbtext += questions[a_id].feedback['onenotcorrect'];
+				}
 			}
 
 			ilias.questions.scormHandler(a_id,"incorrect",ilias.questions.toJSONString(answers[a_id]));
@@ -947,7 +953,7 @@ ilias.questions.showFeedback = function(a_id) {
 			jQuery('#feedback'+a_id).addClass("ilc_qfeedw_FeedbackWrong");
 
 			if (ilias.questions.default_feedback) {
-				fbtext = txt_wrong_answers + '<br /> ' + ilias.questions.txt.please_try_again + '<br />';
+				fbtext = txt_wrong_answers + '<br /> ';
 			}
 
 			if (questions[a_id].feedback['onenotcorrect']) {

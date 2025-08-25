@@ -131,6 +131,17 @@ abstract class ilAssQuestionFeedback
             'feedback_incomplete',
             $this->questionOBJ->isAdditionalContentEditingModePageObject()
         ));
+
+        // JKN PATCH START
+        //if there is more than one number of tries, give a specific hint feedback.
+        if((int)$this->questionOBJ->getNrOfTries() > 0 ){
+            $form->addItem($this->buildFeedbackContentFormProperty(
+                $this->lng->txt('feedback_incomplete_solution_hint'),
+                'feedback_tries',
+                $this->questionOBJ->isAdditionalContentEditingModePageObject()
+            ));
+        }
+        // JKN PATCH END
     }
 
     /**
@@ -161,6 +172,16 @@ abstract class ilAssQuestionFeedback
                 $pageObjectType,
                 $this->getGenericFeedbackPageObjectId($this->questionOBJ->getId(), false)
             );
+
+            // JKN PATCH START
+            if((int)$this->questionOBJ->getNrOfTries() > 0 ){
+                $valueFeedbackSolutionTries = $this->getPageObjectNonEditableValueHTML(
+                    $pageObjectType,
+                    $this->getGenericFeedbackPageObjectId($this->questionOBJ->getId(), 'hint')
+                );
+            }
+            // JKN PATCH END
+
         } else {
             $valueFeedbackSolutionComplete = $this->getGenericFeedbackContent(
                 $this->questionOBJ->getId(),
@@ -171,10 +192,24 @@ abstract class ilAssQuestionFeedback
                 $this->questionOBJ->getId(),
                 false
             );
+
+            // JKN PATCH START
+            if((int)$this->questionOBJ->getNrOfTries() > 0 ){
+                $valueFeedbackSolutionTries =$this->getGenericFeedbackContent(
+                    $this->questionOBJ->getId(),
+                    'hint'
+                );
+            }
+            // JKN PATCH END
         }
 
         $form->getItemByPostVar('feedback_complete')->setValue($valueFeedbackSolutionComplete);
         $form->getItemByPostVar('feedback_incomplete')->setValue($valueFeedbackSolutionIncomplete);
+        // JKN PATCH START
+        if($form->getItemByPostVar('feedback_tries')){
+            $form->getItemByPostVar('feedback_tries')->setValue($valueFeedbackSolutionTries);
+        }
+        // JKN PATCH END
     }
 
     /**
@@ -192,6 +227,13 @@ abstract class ilAssQuestionFeedback
         if (!$this->questionOBJ->isAdditionalContentEditingModePageObject()) {
             $this->saveGenericFeedbackContent($this->questionOBJ->getId(), false, (string) $form->getInput('feedback_incomplete'));
             $this->saveGenericFeedbackContent($this->questionOBJ->getId(), true, (string) $form->getInput('feedback_complete'));
+
+            // JKN PATCH START
+            //adding the hint text if the number of tries is greater than 0.
+            if((int)$this->questionOBJ->getNrOfTries() > 0 ){
+                $this->saveGenericFeedbackContent($this->questionOBJ->getId(), 'hint', $form->getInput('feedback_tries'));
+            }
+            // JKN PATCH END
         }
     }
 
@@ -255,6 +297,14 @@ abstract class ilAssQuestionFeedback
      */
     final public function getGenericFeedbackContent(int $questionId, bool $solutionCompleted): string
     {
+
+        // JKN PATCH START
+        //JKN patch for hints if no tries > 0
+        if( $solutionCompleted === 'hint' ){
+            $solutionCompleted = 2;
+        }
+        // JKN PATCH END
+
         $res = $this->db->queryF(
             "SELECT * FROM {$this->getGenericFeedbackTableName()} WHERE question_fi = %s AND correctness = %s",
             array('integer', 'text'),
@@ -306,6 +356,13 @@ abstract class ilAssQuestionFeedback
     final public function saveGenericFeedbackContent(int $questionId, bool $solutionCompleted, string $feedbackContent): int
     {
         require_once 'Services/RTE/classes/class.ilRTE.php';
+
+        // JKN PATCH START
+        //JKN patch for hints if no tries > 0
+        if( $solutionCompleted === 'hint' ){
+            $solutionCompleted = 2;
+        }
+        // JKN PATCH END
 
         $feedbackId = $this->getGenericFeedbackId($questionId, $solutionCompleted);
 
@@ -734,6 +791,14 @@ abstract class ilAssQuestionFeedback
         $this->saveGenericFeedbackContent($questionId, false, $migrator->migrateToLmContent(
             $this->getGenericFeedbackContent($questionId, false)
         ));
+
+        // JKN PATCH START
+        if((int)$this->questionOBJ->getNrOfTries() > 0 ){
+            $this->saveGenericFeedbackContent($questionId, 'hint', $migrator->migrateToLmContent(
+                $this->getGenericFeedbackContent($questionId, 'hint')
+            ));
+        }
+        // JKN PATCH END
     }
 
     protected function cleanupPageContent(string $content): string
