@@ -169,10 +169,15 @@ class ilObjSystemFolder extends ilObject
             $title = (string) $row->title;
         }
 
+        //Hot fix for language check
+        $language = isset($_GET['lang']) && trim($_GET['lang']) !== ''
+            ? strtolower(trim((string) $_GET['lang']))
+            : $ilUser->getCurrentLanguage();
+
         $q = "SELECT title FROM object_translation " .
             "WHERE obj_id = " . $ilDB->quote($id, 'integer') . " " .
             "AND lang_code = " .
-            $ilDB->quote($ilUser->getCurrentLanguage(), 'text') . " " .
+             $ilDB->quote($language, 'text') . " " .
             "AND NOT lang_default = 1";
         $r = $ilDB->query($q);
         $row = $ilDB->fetchObject($r);
