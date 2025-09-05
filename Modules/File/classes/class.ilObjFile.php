@@ -296,7 +296,7 @@ class ilObjFile extends ilObject2 implements ilObjFileImplementationInterface
 
     public function setFileSize(int $a_size): void
     {
-        throw new LogicException('cannot change filesize');
+         $this->filesize = $a_size;
     }
 
     public function getFileType(): string
