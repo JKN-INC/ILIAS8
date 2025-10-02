@@ -68,13 +68,13 @@ class ilTranslationGUI
             "Translation"
         );
         if ($a_get_post_values) {
-            $vals = array();
-            foreach ($_POST["title"] as $k => $v) {
+		$vals = array();
+        foreach ($_POST["title"] as $k => $v) {
                 $vals[] = array(
                     "title" => $v,
-                    "desc" => $_POST["desc"][$k],
-                    "lang" => $_POST["lang"][$k],
-                    "default" => ($_POST["default"] == $k),
+                    "desc"    => $_POST["desc"][$k] ?? null,
+                    "lang"    => $_POST["lang"][$k] ?? null,
+                    "default" => (($_POST["default"] ?? null) == $k),
                 );
             }
             $table->setData($vals);
