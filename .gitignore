@@ -57,3 +57,5 @@ phpstan-baseline.neon
 
 # File Delivery
 override.php
+
+.vscode/
