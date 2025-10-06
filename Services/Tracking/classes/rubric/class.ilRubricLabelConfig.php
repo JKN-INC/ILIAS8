@@ -113,5 +113,3 @@ class rubricLabelConfig extends ActiveRecord {
 
        
 }
-?>
-

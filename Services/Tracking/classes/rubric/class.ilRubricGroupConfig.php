@@ -103,5 +103,3 @@ class rubricGroupConfig extends ActiveRecord {
 
        
 }
-?>
-

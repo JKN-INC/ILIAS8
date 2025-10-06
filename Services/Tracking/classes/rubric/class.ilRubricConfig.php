@@ -139,14 +139,5 @@ class rubricConfig extends ActiveRecord {
         public static function getAll() {
                 return self::get();
         }
-
-        
-        
-        
-        
-
-
-       
+ 
 }
-?>
-

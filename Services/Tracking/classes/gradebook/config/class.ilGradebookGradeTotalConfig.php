@@ -379,5 +379,3 @@ class ilGradebookGradeTotalConfig extends ActiveRecord
 
 
 }
-?>
-

@@ -107,5 +107,3 @@ class rubricCriteriaConfig extends ActiveRecord {
 
        
 }
-?>
-

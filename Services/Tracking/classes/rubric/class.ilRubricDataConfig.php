@@ -122,5 +122,3 @@ class rubricDataConfig extends ActiveRecord {
 
        
 }
-?>
-
