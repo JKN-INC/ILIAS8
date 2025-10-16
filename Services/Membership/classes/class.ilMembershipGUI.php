@@ -498,7 +498,7 @@ class ilMembershipGUI
             );
         }
         // JKN PATCH START
-        $statuses = (array) isset($_POST['status']) ? $_POST['status'] : [];
+        $statuses = (array) (isset($_POST['status']) ? $_POST['status'] : []);
         $status = ilLPStatus::LP_STATUS_NOT_ATTEMPTED_NUM;
         // JKN PATCH END
 
