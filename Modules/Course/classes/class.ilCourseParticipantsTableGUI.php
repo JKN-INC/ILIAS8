@@ -243,10 +243,11 @@ class ilCourseParticipantsTableGUI extends ilParticipantTableGUI
         }
         if ($this->show_learning_progress) {
             $this->tpl->setCurrentBlock('lp');
+            $progress = $a_set['progress'] ?? '';
             $icons = ilLPStatusIcons::getInstance(ilLPStatusIcons::ICON_VARIANT_LONG);
-            $icon_rendered = $icons->renderIconForStatus($icons->lookupNumStatus($a_set['progress']));
+            $icon_rendered = $icons->renderIconForStatus($icons->lookupNumStatus($progress));
 
-            $this->tpl->setVariable('LP_STATUS_ALT', $this->lng->txt($a_set['progress']));
+            $this->tpl->setVariable('LP_STATUS_ALT', $this->lng->txt($progress));
             $this->tpl->setVariable('LP_STATUS_ICON', $icon_rendered);
 
             $this->tpl->parseCurrentBlock();
@@ -263,7 +264,8 @@ class ilCourseParticipantsTableGUI extends ilParticipantTableGUI
                 ilLPStatus::LP_STATUS_NOT_ATTEMPTED => $this->lng->txt("trac_not_attempted")
             );
             $si = new ilSelectInputGUI($this->lng->txt("crs_status"), "status[".$a_set['usr_id']."]");
-            $si->setValue($a_set['progress']);
+            $progress = $a_set['progress'] ?? '';
+            $si->setValue($progress);
             $si->setOptions($options);
 
             $this->tpl->setCurrentBlock('grade');
