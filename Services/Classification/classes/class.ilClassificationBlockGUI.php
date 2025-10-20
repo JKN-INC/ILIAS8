@@ -344,20 +344,11 @@ class ilClassificationBlockGUI extends ilBlockGUI
                 }
             }
         }
-
-<<<<<<< Updated upstream
-        //The presentation was always serving list view so if tiles, just do the refresh instead of the ajax rendering. 
-        if($presentation === 'tile'){
-            // if nothing has been selected reload to category page
-            if (!$has_content && !$no_provider ) {
-                echo ilUtil::getSystemMessageHTML($lng->txt("clsfct_content_no_match"), "info");
-=======
         //The presentation was always serving list view so if tiles, just do the resfresh instead of the ajax rendering. 
         if($presentation === 'tile'){
             // if nothing has been selected reload to category page
             if (!$has_content && !$no_provider ) {
-                ilUtil::sendFailure($lng->txt("clsfct_content_no_match"), "info");
->>>>>>> Stashed changes
+                ilUtil::getSystemMessageHTML($lng->txt("clsfct_content_no_match"), "info");
             }
             echo "<span id='block_" . $this->getBlockType() . "_0_loader'></span>";
             echo "<script>il.Classification.returnToParent();</script>";
@@ -377,26 +368,6 @@ class ilClassificationBlockGUI extends ilBlockGUI
             }
             exit();
         }
-<<<<<<< Updated upstream
-        else{
-            // if nothing has been selected reload to category page
-            if ($no_provider) {
-                echo "<span id='block_" . $this->getBlockType() . "_0_loader'></span>";
-                echo "<script>il.Classification.returnToParent();</script>";
-                exit();
-            }
-
-            if ($has_content) {
-                echo $ltpl->get();
-            } else {
-                //$content_block->setContent($lng->txt("clsfct_content_no_match"));
-                echo ilUtil::getSystemMessageHTML($lng->txt("clsfct_content_no_match"), "info");
-            }
-
-            exit();
-        }
-=======
->>>>>>> Stashed changes
     }
 
     protected function initProviders(bool $a_check_post = false): void
