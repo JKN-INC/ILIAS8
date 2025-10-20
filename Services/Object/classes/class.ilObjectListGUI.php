@@ -3340,12 +3340,13 @@ class ilObjectListGUI
             ) . $title;
         }
 
+        //updating the call for the icon to reflect if there is a custom icon. This was updated in future ILIAS Versions
         $icon = $this->ui
             ->factory()
             ->symbol()
             ->icon()
-            ->standard($type, $this->lng->txt('obj_' . $type))
-        ;
+            ->custom(ilObject::_getIcon($obj_id), $this->lng->txt("icon") . " " . $this->lng->txt('obj_' . $type))
+            ->withSize('medium');
 
 
 
