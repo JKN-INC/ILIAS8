@@ -348,7 +348,7 @@ class ilClassificationBlockGUI extends ilBlockGUI
         if($presentation === 'tile'){
             // if nothing has been selected reload to category page
             if (!$has_content && !$no_provider ) {
-                ilUtil::getSystemMessageHTML($lng->txt("clsfct_content_no_match"), "info");
+                echo ilUtil::getSystemMessageHTML($lng->txt("clsfct_content_no_match"), "info");
             }
             echo "<span id='block_" . $this->getBlockType() . "_0_loader'></span>";
             echo "<script>il.Classification.returnToParent();</script>";
