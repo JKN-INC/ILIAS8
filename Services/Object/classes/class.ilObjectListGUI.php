@@ -3340,12 +3340,11 @@ class ilObjectListGUI
             ) . $title;
         }
 
-        $icon = $this->ui
-            ->factory()
+        $icon = $this->ui->factory()
             ->symbol()
             ->icon()
-            ->standard($type, $this->lng->txt('obj_' . $type))
-        ;
+            ->custom(ilObject::_getIcon($obj_id), $this->lng->txt("icon") . " " . $this->lng->txt('obj_' . $type))
+            ->withSize('medium');
 
 
 
