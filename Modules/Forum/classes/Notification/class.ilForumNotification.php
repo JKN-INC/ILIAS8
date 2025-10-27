@@ -305,7 +305,11 @@ class ilForumNotification
     {
         global $DIC;
 
-        if (!array_key_exists($ref_id, self::$node_data_cache)) {
+	    if (!array_key_exists($ref_id, self::$node_data_cache)) {
+            $container_node = $DIC->repositoryTree()->getNodeData($ref_id);
+            if (!isset($container_node['child'])) {
+                return [];
+            }  
             $node_data = $DIC->repositoryTree()->getSubTree(
                 $DIC->repositoryTree()->getNodeData($ref_id),
                 true,
