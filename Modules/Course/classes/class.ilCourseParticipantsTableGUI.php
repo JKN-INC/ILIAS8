@@ -263,6 +263,10 @@ class ilCourseParticipantsTableGUI extends ilParticipantTableGUI
                 ilLPStatus::LP_STATUS_NOT_ATTEMPTED => $this->lng->txt("trac_not_attempted")
             );
             $si = new ilSelectInputGUI($this->lng->txt("crs_status"), "status[".$a_set['usr_id']."]");
+
+            if(!isset($a_set['progress'])) {
+                $a_set['progress'] = ilLPStatus::LP_STATUS_NOT_ATTEMPTED;
+            }
             $si->setValue($a_set['progress']);
             $si->setOptions($options);
 
