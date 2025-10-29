@@ -80,12 +80,13 @@ abstract class ilAssQuestionFeedback
         $this->lng = $lng;
         $this->db = $db;
     }
-
+    
+    // JKN PATCH START
     /**
      * returns the html of GENERIC feedback for the given question id for test presentation
      * (either for the complete solution or for the incomplete solution)
      */
-    public function getGenericFeedbackTestPresentation(int $questionId, bool $solutionCompleted): string
+    public function getGenericFeedbackTestPresentation(int $questionId, mixed $solutionCompleted): string
     {
         if ($this->page_obj_output_mode == "edit") {
             return '';
@@ -100,6 +101,7 @@ abstract class ilAssQuestionFeedback
         }
         return $this->getGenericFeedbackContent($questionId, $solutionCompleted);
     }
+    // JKN PATCH END
 
     /**
      * returns the html of SPECIFIC feedback for the given question id
