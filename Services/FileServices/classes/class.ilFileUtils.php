@@ -242,7 +242,8 @@ class ilFileUtils
     public static function rCopy(
         string $a_sdir,
         string $a_tdir,
-        bool $preserveTimeAttributes = false
+        bool $preserveTimeAttributes = false,
+        bool $overwrite = false
     ): bool {
         $sourceFS = LegacyPathHelper::deriveFilesystemFrom($a_sdir);
         $targetFS = LegacyPathHelper::deriveFilesystemFrom($a_tdir);
@@ -269,7 +270,14 @@ class ilFileUtils
                 $stream = $sourceFS->readStream($item->getPath());
                 $targetFS->writeStream($itemPath, $stream);
             } catch (\ILIAS\Filesystem\Exception\FileAlreadyExistsException $e) {
-                // Do nothing with that type of exception
+                // JKN PATCH START
+                if ($overwrite) {
+                    $targetFS->delete($itemPath);
+                    $stream = $sourceFS->readStream($item->getPath());
+                    $targetFS->writeStream($itemPath, $stream);
+                }
+                // JKN PATCH END
+                // else do nothing (skip)
             }
         }
 
@@ -928,10 +936,14 @@ class ilFileUtils
             }
         } else {
             $target_directory = $target_dir_name;
+            // JKN PATCH START
             self::rCopy(
                 $temporary_unzip_directory,
-                $target_directory
+                $target_directory,
+                false,
+                true
             );
+            // JKN PATCH END
         }
 
         self::delDir($temporary_unzip_directory);
