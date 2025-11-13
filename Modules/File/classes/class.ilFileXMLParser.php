@@ -68,6 +68,7 @@ class ilFileXMLParser extends ilSaxParser
     protected array $versions = [];
     protected ?string $import_directory = null;
     protected ?string $cdata = null;
+    protected ?bool $isReadingFile = false;
 
     /**
      * Constructor
@@ -161,6 +162,8 @@ class ilFileXMLParser extends ilSaxParser
                 }
 
                 $this->mode = ilFileXMLParser::$CONTENT_NOT_COMPRESSED;
+                $this->isReadingFile = true;
+                $this->tmpFilename = ilFileUtils::ilTempnam();
                 #echo $a_attribs["mode"];
                 if (isset($a_attribs["mode"])) {
                     if ($a_attribs["mode"] == "GZIP") {
@@ -240,7 +243,7 @@ class ilFileXMLParser extends ilSaxParser
                     // Old import files
                     break;
                 }
-
+            $this->isReadingFile = false;
                 $baseDecodedFilename = ilFileUtils::ilTempnam();
                 if ($this->mode == ilFileXMLParser::$CONTENT_COPY) {
                     $this->tmpFilename = $this->getImportDirectory() . "/" . self::normalizeRelativePath($this->cdata);
@@ -285,12 +288,6 @@ class ilFileXMLParser extends ilSaxParser
                     if (is_file($this->tmpFilename)) {
                         $this->file->setFileSize(filesize($this->tmpFilename)); // strlen($this->content));
                     }
-
-                    // if no file type is given => lookup mime type
-                    if (!$this->file->getFileType()) {
-                        global $DIC;
-                        $this->file->setFileType(MimeType::getMimeType($this->tmpFilename));
-                    }
                 }
 
                 $this->versions[] = [
@@ -320,10 +317,12 @@ class ilFileXMLParser extends ilSaxParser
     {
         if ($a_data != "\n") {
             // begin-patch fm
-            if ($this->mode != ilFileXMLParser::$CONTENT_COPY
+            if ($this->isReadingFile && $this->mode != ilFileXMLParser::$CONTENT_COPY
                 && $this->mode != ilFileXMLParser::$CONTENT_REST
             ) { // begin-patch fm
-                $this->cdata .= $a_data;
+                $handle = fopen($this->tmpFilename, "a");
+                fwrite($handle, $a_data);
+                fclose($handle);
             } else {
                 $this->cdata .= $a_data;
             }
