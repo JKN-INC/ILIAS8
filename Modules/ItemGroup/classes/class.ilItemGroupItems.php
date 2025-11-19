@@ -145,10 +145,10 @@ class ilItemGroupItems
         $nodes = $this->tree->getChilds($parent_node["child"]);
 
         foreach ($nodes as $node) {
-            // filter side blocks and session, item groups and role folder
+            // filter side blocks and item groups and role folder
             if ($node['child'] == $parent_node["child"] ||
                 $this->obj_def->isSideBlock($node['type']) ||
-                in_array($node['type'], array('sess', 'itgr', 'rolf', 'adm'))) {
+                in_array($node['type'], array('itgr', 'rolf', 'adm'))) {
                 continue;
             }
 
