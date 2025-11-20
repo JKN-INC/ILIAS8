@@ -310,11 +310,11 @@ class ilLTIPlatform extends ToolProvider\Platform
 
     /**
      * Load the platform from the database by its record ID.
-     * @param int        $id            The platform record ID
+     * @param int|null        $id            The platform record ID
      * @param ilLTIDataConnector $dataConnector Database connection object
      * @return \ilLTIPlatform Platform       The platform object
      */
-    public static function fromRecordId(int $id, ilLTIDataConnector $dataConnector): \ilLTIPlatform
+    public static function fromRecordId(?int $id, ilLTIDataConnector $dataConnector): \ilLTIPlatform
     {
 //        $platform = new static($dataConnector);
         $platform = new ilLTIPlatform($dataConnector);

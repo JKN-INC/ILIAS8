@@ -657,15 +657,19 @@ class Context
 
     /**
      * Load the context from the database.
-     * @param int           $id            Record ID of context
+     *
+     * @param int|null $id Record ID of context
      * @param \ILIAS\LTI\ToolProvider\DataConnector\DataConnector $dataConnector Database connection object
-     * @return Context    Context object
+     * @return Context Context object
      */
-    public static function fromRecordId(int $id, \ILIAS\LTI\ToolProvider\DataConnector\DataConnector $dataConnector): Context
+    public static function fromRecordId(?int $id, \ILIAS\LTI\ToolProvider\DataConnector\DataConnector $dataConnector): Context
     {
         $context = new Context();
         $context->dataConnector = $dataConnector;
-        $context->load($id);
+
+        if ($id !== null) {
+            $context->load($id);
+        }
 
         return $context;
     }
