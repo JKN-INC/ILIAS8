@@ -197,6 +197,11 @@ class ilSessionParticipantsTableGUI extends ilTable2GUI
         return self::$all_columns;
     }
 
+    public function numericOrdering(string $a_field): bool
+    {
+        return in_array($a_field, ['registered', 'participated', 'excused', 'contact'], true);
+    }
+
     public function parse(): void
     {
         $all_participants = [];
@@ -224,7 +229,7 @@ class ilSessionParticipantsTableGUI extends ilTable2GUI
             $tmp_data['mark'] = $usr_data['mark'] ?? null;
             $tmp_data['comment'] = $usr_data['comment'] ?? null;
             $tmp_data['participated'] = $this->getParticipants()->getEventParticipants()->hasParticipated((int) $participant['usr_id']);
-            $tmp_data['registered'] = $this->getParticipants()->getEventParticipants()->isRegistered((int) $participant['usr_id']) ? 1 : 0;
+            $tmp_data['registered'] = $this->getParticipants()->getEventParticipants()->isRegistered((int) $participant['usr_id']);
             $tmp_data['excused'] = $this->getParticipants()->getEventParticipants()->isExcused((int) $participant['usr_id']);
             $tmp_data['contact'] = $this->getParticipants()->isContact((int) $participant['usr_id']);
 
