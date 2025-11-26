@@ -102,7 +102,7 @@ class ilCOPageImporter extends ilXmlImporter
                             $page->updateFromXML();
                             $this->extractPluginProperties($page);
                         } else {
-                            if (ilPageObject::_exists($id[0], (int) $id[1], "-", true)) {
+                            if ($lstr === "-" && ilPageObject::_exists($id[0], (int) $id[1], "-", true)) {
                                 return;
                             }
                             $new_page = ilPageObjectFactory::getInstance($id[0]);
@@ -174,8 +174,7 @@ class ilCOPageImporter extends ilXmlImporter
 
     public function afterContainerImportProcessing(
         ilImportMapping $a_mapping
-    ): void {
-    }
+    ): void {}
 
     /**
      * Extract the properties of the plugged page contents
