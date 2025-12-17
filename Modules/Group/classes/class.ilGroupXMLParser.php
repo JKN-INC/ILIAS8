@@ -437,8 +437,8 @@ class ilGroupXMLParser extends ilMDSaxParser implements ilSaxSubsetParser
                     );
                 } else {
                     $this->group_obj->setPeriod(
-                        new \ilDateTime($this->group_data['period_start'], IL_CAL_UNIX),
-                        new \ilDateTime($this->group_data['period_end'], IL_CAL_UNIX)
+                        new \ilDate($this->group_data['period_start'], IL_CAL_UNIX),
+                        new \ilDate($this->group_data['period_end'], IL_CAL_UNIX)
                     );
                 }
             } catch (Exception $e) {
