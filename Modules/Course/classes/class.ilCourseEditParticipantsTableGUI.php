@@ -117,7 +117,7 @@ class ilCourseEditParticipantsTableGUI extends ilTable2GUI
             ilLPStatus::LP_STATUS_NOT_ATTEMPTED => $this->lng->txt("trac_not_attempted")
         );
         $si = new ilSelectInputGUI($this->lng->txt("crs_status"), "status[".$a_set['usr_id']."]");
-        $si->setValue($a_set['progress']);
+        $progress = isset($a_set['progress']) ? $a_set['progress'] : ilLPStatus::LP_STATUS_NOT_ATTEMPTED;
         $si->setOptions($options);
         $this->tpl->setVariable('GRADE_STATUS', $si->render());
         // JKN PATCH END
