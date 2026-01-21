@@ -116,6 +116,19 @@ class ilContainerByTypeContentGUI extends ilContainerContentGUI
             if (isset($this->items[$type]) && is_array($this->items[$type]) &&
                 $this->renderer->addTypeBlock($type)) {
                 $this->renderer->setBlockPosition($type, ++$pos);
+                
+                // Sort sessions by start time
+                if ($type === 'sess') {
+                    usort($this->items[$type], function($a, $b) {
+                        $sess_a = new ilObjSession($a['obj_id'], false);
+                        $sess_b = new ilObjSession($b['obj_id'], false);
+                        $appt_a = $sess_a->getFirstAppointment();
+                        $appt_b = $sess_b->getFirstAppointment();
+                        $time_a = $appt_a ? $appt_a->getStartingTime() : 0;
+                        $time_b = $appt_b ? $appt_b->getStartingTime() : 0;
+                        return $time_a <=> $time_b;
+                    });
+                }
 
                 $position = 1;
                 $counter = 1;
