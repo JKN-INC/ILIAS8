@@ -340,6 +340,13 @@ return [
         ILIAS\FileUpload\MimeType::TEXT__JAVASCRIPT,
         ILIAS\FileUpload\MimeType::TEXT__ECMASCRIPT,
     ],
+    'mjs' => [
+        ILIAS\FileUpload\MimeType::APPLICATION__JAVASCRIPT,
+        ILIAS\FileUpload\MimeType::APPLICATION__X_JAVASCRIPT,
+        ILIAS\FileUpload\MimeType::APPLICATION__ECMASCRIPT,
+        ILIAS\FileUpload\MimeType::TEXT__JAVASCRIPT,
+        ILIAS\FileUpload\MimeType::TEXT__ECMASCRIPT,
+    ],
     'json' => [
         ILIAS\FileUpload\MimeType::APPLICATION__JSON, // rfc4627
         ILIAS\FileUpload\MimeType::APPLICATION__JAVASCRIPT,
