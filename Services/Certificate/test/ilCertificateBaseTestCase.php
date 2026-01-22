@@ -26,4 +26,31 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class ilCertificateBaseTestCase extends TestCase
 {
+
+    protected function setUp(): void
+    {
+        if (!defined('ANONYMOUS_USER_ID')) {
+            define('ANONYMOUS_USER_ID', 13);
+        }
+
+        global $DIC;
+
+        $this->dic = is_object($DIC) ? clone $DIC : $DIC;
+
+        $DIC = new Container();
+
+        parent::setUp();
+    }
+
+    protected function setGlobalVariable(string $name, $value): void
+    {
+        global $DIC;
+
+        $GLOBALS[$name] = $value;
+
+        unset($DIC[$name]);
+        $DIC[$name] = static function (Container $c) use ($name) {
+            return $GLOBALS[$name];
+        };
+    }
 }
