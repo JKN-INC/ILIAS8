@@ -157,6 +157,8 @@ class ilDefaultPlaceholderValuesTest extends ilCertificateBaseTestCase
             1
         );
 
+        $placeHolderObject->setUserLanguage($language);
+        
         $result = $placeHolderObject->getPlaceholderValues(100, 200);
 
         $this->assertEquals(
