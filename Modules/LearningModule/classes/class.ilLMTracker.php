@@ -505,7 +505,7 @@ class ilLMTracker
         if ($a_node["child"] == $a_highlighted_node) {
             return $icons->getImagePathRunning();
         }
-        if (isset($this->tree_arr["nodes"][$a_node["child"]])) {
+        if (isset($this->tree_arr["nodes"][$a_node["child"]]) && isset($this->tree_arr["nodes"][$a_node["child"]]["status"])) {
             switch ($this->tree_arr["nodes"][$a_node["child"]]["status"]) {
                 case ilLMTracker::IN_PROGRESS:
                     return $icons->getImagePathInProgress();
