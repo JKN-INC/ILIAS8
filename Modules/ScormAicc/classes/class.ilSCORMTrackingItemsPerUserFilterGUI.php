@@ -70,7 +70,9 @@ class ilSCORMTrackingItemsPerUserFilterGUI extends ilPropertyFormGUI
         }
 
         // JKN PATCH START
-        sort($options);
+        $all = array_splice($options, 0, 1); 
+        asort($options);                     
+        $options = $all + $options;          // put "all" back at the top
         // JKN PATCH END
 
         $si = new ilSelectInputGUI($lng->txt("user"), "userSelected");
