@@ -4207,6 +4207,9 @@ class ilObjTest extends ilObject implements ilMarkSchemaAware, ilEctsGradesEnabl
                         $questionsequence = unserialize($seqrow["sequence"]);
 
                         foreach ($questionsequence as $sidx => $seq) {
+                            if (!isset($questionsbysequence[$seq])) {
+                              continue;
+                            }
                             $data->getParticipant($active_id)->addQuestion(
                                 $questionsbysequence[$seq]["original_id"],
                                 $questionsbysequence[$seq]["question_fi"],
