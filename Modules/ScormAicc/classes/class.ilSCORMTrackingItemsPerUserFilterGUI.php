@@ -50,6 +50,7 @@ class ilSCORMTrackingItemsPerUserFilterGUI extends ilPropertyFormGUI
 
         $options = array("all" => $lng->txt("all"));
         $users = ilTrQuery::getParticipantsForObject($this->parent_obj->getRefId());
+
         $privacy = ilPrivacySettings::getInstance();
         $allowExportPrivacy = $privacy->enabledExportSCORM();
 
@@ -70,9 +71,14 @@ class ilSCORMTrackingItemsPerUserFilterGUI extends ilPropertyFormGUI
         }
 
         // JKN PATCH START
-        $all = array_splice($options, 0, 1); 
-        asort($options, SORT_NATURAL | SORT_FLAG_CASE);                   
-        $options = $all + $options;          // put "all" back at the top
+        if (isset($options['all'])) {
+            $all = ['all' => $options['all']];
+            unset($options['all']);
+            asort($options, SORT_NATURAL | SORT_FLAG_CASE);
+            $options = $all + $options;
+        } else {
+            asort($options, SORT_NATURAL | SORT_FLAG_CASE);
+        }
         // JKN PATCH END
 
         $si = new ilSelectInputGUI($lng->txt("user"), "userSelected");
