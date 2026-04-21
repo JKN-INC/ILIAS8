@@ -876,20 +876,39 @@ class ilFileUtils
         $unzippable_zip_directory = $unzippable_zip_path_info["dirname"];
         $unzippable_zip_filename = $unzippable_zip_path_info["basename"];
 
-        // unzip
-        $current_directory = getcwd();
-        chdir($unzippable_zip_directory);
-        $unzip_command = PATH_TO_UNZIP;
-
-        // real unzip
-        if (!$overwrite_existing) {
-            $unzip_parameters = ilShellUtil::escapeShellArg($unzippable_zip_filename);
-        } else {
-            $unzip_parameters = "-o " . ilShellUtil::escapeShellArg($unzippable_zip_filename);
+        // JKN PATCH START
+        // Use ZipArchive instead of the CLI unzip binary to correctly preserve
+        // Unicode filenames (the CLI unzip escapes non-ASCII chars as #Uxxxx).
+        $zip = new ZipArchive();
+        if ($zip->open($path_to_zip_file) === true) {
+            $real_target = realpath($unzippable_zip_directory);
+            // Security: check each entry for path traversal (zip slip) before extracting
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $entry_name = $zip->getNameIndex($i);
+                $entry_real = $real_target . DIRECTORY_SEPARATOR . $entry_name;
+                // Normalise without requiring the path to exist yet
+                $entry_real = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $entry_real);
+                // Resolve any .. segments manually
+                $parts = array_filter(explode(DIRECTORY_SEPARATOR, $entry_real), 'strlen');
+                $resolved = [];
+                foreach ($parts as $part) {
+                    if ($part === '..') {
+                        array_pop($resolved);
+                    } elseif ($part !== '.') {
+                        $resolved[] = $part;
+                    }
+                }
+                $resolved_path = DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $resolved);
+                if (strpos($resolved_path, $real_target) !== 0) {
+                    $zip->close();
+                    self::delDir($temporary_unzip_directory);
+                    throw new ilFileUtilsException("Path traversal detected in zip archive entry: " . $entry_name);
+                }
+            }
+            $zip->extractTo($unzippable_zip_directory);
+            $zip->close();
+            // JKN PATCH END
         }
-        ilShellUtil::execQuoted($unzip_command, $unzip_parameters);
-        // move back
-        chdir($current_directory);
 
         // remove all sym links
         clearstatcache();			// prevent is_link from using cache
@@ -902,7 +921,7 @@ class ilFileUtils
                     $log->info("Removed symlink " . $name);
                 }
             }
-            if (is_file($name) && $name !== $sanitizer->sanitize($name)) {
+            if (is_file($name) && !$sanitizer->isClean(basename($name))) {
                 // rename file if it contains invalid suffix
                 $new_name = ilFileUtils::getValidFilename($name);
                 rename($name, $new_name);
@@ -937,12 +956,31 @@ class ilFileUtils
         } else {
             $target_directory = $target_dir_name;
             // JKN PATCH START
-            self::rCopy(
-                $temporary_unzip_directory,
-                $target_directory,
-                false,
-                true
+            // Use native PHP copy instead of rCopy (Flysystem) to avoid
+            // FilesystemWhitelistDecorator::writeStream calling sanitize() which
+            // NFC-normalizes paths and renames NFD filenames (e.g. macOS ZIPs).
+            $it = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    $temporary_unzip_directory,
+                    RecursiveDirectoryIterator::SKIP_DOTS
+                ),
+                RecursiveIteratorIterator::SELF_FIRST
             );
+            $tmp_real = realpath($temporary_unzip_directory);
+            foreach ($it as $item) {
+                $rel = substr($item->getPathname(), strlen($tmp_real));
+                $dest = $target_directory . $rel;
+                if ($item->isDir()) {
+                    if (!is_dir($dest)) {
+                        mkdir($dest, 0755, true);
+                    }
+                } else {
+                    if (file_exists($dest)) {
+                        unlink($dest);
+                    }
+                    copy($item->getPathname(), $dest);
+                }
+            }
             // JKN PATCH END
         }
 
