@@ -921,7 +921,7 @@ class ilFileUtils
                     $log->info("Removed symlink " . $name);
                 }
             }
-            if (is_file($name) && $name !== $sanitizer->sanitize($name)) {
+            if (is_file($name) && !$sanitizer->isClean(basename($name))) {
                 // rename file if it contains invalid suffix
                 $new_name = ilFileUtils::getValidFilename($name);
                 rename($name, $new_name);
@@ -975,6 +975,9 @@ class ilFileUtils
                         mkdir($dest, 0755, true);
                     }
                 } else {
+                    if (file_exists($dest)) {
+                        unlink($dest);
+                    }
                     copy($item->getPathname(), $dest);
                 }
             }
