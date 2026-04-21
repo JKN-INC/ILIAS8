@@ -954,12 +954,28 @@ class ilFileUtils
         } else {
             $target_directory = $target_dir_name;
             // JKN PATCH START
-            self::rCopy(
-                $temporary_unzip_directory,
-                $target_directory,
-                false,
-                true
+            // Use native PHP copy instead of rCopy (Flysystem) to avoid
+            // FilesystemWhitelistDecorator::writeStream calling sanitize() which
+            // NFC-normalizes paths and renames NFD filenames (e.g. macOS ZIPs).
+            $it = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    $temporary_unzip_directory,
+                    RecursiveDirectoryIterator::SKIP_DOTS
+                ),
+                RecursiveIteratorIterator::SELF_FIRST
             );
+            $tmp_real = realpath($temporary_unzip_directory);
+            foreach ($it as $item) {
+                $rel = substr($item->getPathname(), strlen($tmp_real));
+                $dest = $target_directory . $rel;
+                if ($item->isDir()) {
+                    if (!is_dir($dest)) {
+                        mkdir($dest, 0755, true);
+                    }
+                } else {
+                    copy($item->getPathname(), $dest);
+                }
+            }
             // JKN PATCH END
         }
 
