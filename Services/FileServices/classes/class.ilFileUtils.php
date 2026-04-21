@@ -876,6 +876,7 @@ class ilFileUtils
         $unzippable_zip_directory = $unzippable_zip_path_info["dirname"];
         $unzippable_zip_filename = $unzippable_zip_path_info["basename"];
 
+        // JKN PATCH START
         // Use ZipArchive instead of the CLI unzip binary to correctly preserve
         // Unicode filenames (the CLI unzip escapes non-ASCII chars as #Uxxxx).
         $zip = new ZipArchive();
@@ -906,6 +907,7 @@ class ilFileUtils
             }
             $zip->extractTo($unzippable_zip_directory);
             $zip->close();
+            // JKN PATCH END
         }
 
         // remove all sym links
