@@ -876,20 +876,37 @@ class ilFileUtils
         $unzippable_zip_directory = $unzippable_zip_path_info["dirname"];
         $unzippable_zip_filename = $unzippable_zip_path_info["basename"];
 
-        // unzip
-        $current_directory = getcwd();
-        chdir($unzippable_zip_directory);
-        $unzip_command = PATH_TO_UNZIP;
-
-        // real unzip
-        if (!$overwrite_existing) {
-            $unzip_parameters = ilShellUtil::escapeShellArg($unzippable_zip_filename);
-        } else {
-            $unzip_parameters = "-o " . ilShellUtil::escapeShellArg($unzippable_zip_filename);
+        // Use ZipArchive instead of the CLI unzip binary to correctly preserve
+        // Unicode filenames (the CLI unzip escapes non-ASCII chars as #Uxxxx).
+        $zip = new ZipArchive();
+        if ($zip->open($path_to_zip_file) === true) {
+            $real_target = realpath($unzippable_zip_directory);
+            // Security: check each entry for path traversal (zip slip) before extracting
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $entry_name = $zip->getNameIndex($i);
+                $entry_real = $real_target . DIRECTORY_SEPARATOR . $entry_name;
+                // Normalise without requiring the path to exist yet
+                $entry_real = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $entry_real);
+                // Resolve any .. segments manually
+                $parts = array_filter(explode(DIRECTORY_SEPARATOR, $entry_real), 'strlen');
+                $resolved = [];
+                foreach ($parts as $part) {
+                    if ($part === '..') {
+                        array_pop($resolved);
+                    } elseif ($part !== '.') {
+                        $resolved[] = $part;
+                    }
+                }
+                $resolved_path = DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $resolved);
+                if (strpos($resolved_path, $real_target) !== 0) {
+                    $zip->close();
+                    self::delDir($temporary_unzip_directory);
+                    throw new ilFileUtilsException("Path traversal detected in zip archive entry: " . $entry_name);
+                }
+            }
+            $zip->extractTo($unzippable_zip_directory);
+            $zip->close();
         }
-        ilShellUtil::execQuoted($unzip_command, $unzip_parameters);
-        // move back
-        chdir($current_directory);
 
         // remove all sym links
         clearstatcache();			// prevent is_link from using cache
