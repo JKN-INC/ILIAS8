@@ -966,10 +966,8 @@ class ilFileUtils
                 ),
                 RecursiveIteratorIterator::SELF_FIRST
             );
-            $tmp_real = realpath($temporary_unzip_directory);
             foreach ($it as $item) {
-                $rel = substr($item->getPathname(), strlen($tmp_real));
-                $dest = $target_directory . $rel;
+                $dest = $target_directory . DIRECTORY_SEPARATOR . $it->getSubPathname();
                 if ($item->isDir()) {
                     if (!is_dir($dest)) {
                         mkdir($dest, 0755, true);
