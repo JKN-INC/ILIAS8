@@ -2679,6 +2679,7 @@ class ilTable2GUI extends ilTableGUI
                     $csv = new ilCSVWriter();
                     $csv->setSeparator(";");
                     $csv->setSepDirective();
+                    $csv->setNormalizeLineBreaks();
 
                     ob_start();
                     $this->fillMetaCSV($csv);
