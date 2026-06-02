@@ -23,10 +23,30 @@ class ilCSVWriter
     private string $new_line = "\n";
     private bool $do_utf8_decoding = false;
     private bool $first_entry = true;
+    private bool $sep_directive = false;
+    private bool $normalize_line_breaks = false;
 
     public function setSeparator(string $a_sep): void
     {
         $this->separator = $a_sep;
+    }
+
+    /**
+     * Prepend a sep= directive so Excel auto-detects the separator.
+     * Must be called before any addColumn()/addRow() calls.
+     */
+    public function setSepDirective(bool $enabled = true): void
+    {
+        $this->sep_directive = $enabled;
+    }
+
+    /**
+     * Replace line breaks in field values with spaces.
+     * Keep disabled by default to preserve CSV data fidelity.
+     */
+    public function setNormalizeLineBreaks(bool $enabled = true): void
+    {
+        $this->normalize_line_breaks = $enabled;
     }
 
     public function setDelimiter(string $a_del): void
@@ -58,11 +78,17 @@ class ilCSVWriter
 
     public function getCSVString(): string
     {
+        if ($this->sep_directive) {
+            return 'sep=' . $this->separator . $this->new_line . $this->csv;
+        }
         return $this->csv;
     }
 
     private function quote(string $a_str): string
     {
+        if ($this->normalize_line_breaks) {
+            $a_str = str_replace(["\r\n", "\r", "\n"], ' ', $a_str);
+        }
         return str_replace(
             $this->delimiter,
             $this->delimiter . $this->delimiter,
