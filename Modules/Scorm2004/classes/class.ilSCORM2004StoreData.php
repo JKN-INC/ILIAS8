@@ -164,7 +164,13 @@ class ilSCORM2004StoreData
 
         //$new_global_status=ilSCORM2004StoreData::setGlobalObjectivesAndGetGlobalStatus($userId, $packageId, $data);
         ilSCORM2004StoreData::setGlobalObjectives($userId, $packageId, $data);
-        $new_global_status = $data->now_global_status;
+        // $data->now_global_status is client-supplied and may legitimately be null/absent
+        // (e.g. when syncing from the SCORM Offline Player, or if the tab closed before the
+        // client-side status computation finished) - normalize defensively instead of trusting it blindly.
+        $new_global_status = $data->now_global_status ?? null;
+        if ($new_global_status !== null) {
+            $new_global_status = (int) $new_global_status;
+        }
         $return["new_global_status"] = $new_global_status;
 
         // mantis #30293
@@ -175,7 +181,11 @@ class ilSCORM2004StoreData
             }
         }
 
-        ilSCORM2004StoreData::syncGlobalStatus($userId, $packageId, $refId, $data, $new_global_status, $time_from_lms);
+        try {
+            ilSCORM2004StoreData::syncGlobalStatus($userId, $packageId, $refId, $data, $new_global_status, $time_from_lms);
+        } catch (\Throwable $e) {
+            $ilLog->error("SCORM2004 syncGlobalStatus failed for packageId=" . $packageId . ", userId=" . $userId . ": " . $e->getMessage() . "\n" . $e->getTraceAsString());
+        }
 
         $ilLog->debug("SCORM: return of persistCMIData: " . json_encode($return));
         if ($jsMode) {
@@ -655,29 +665,46 @@ class ilSCORM2004StoreData
         return $returnAr;
     }
 
-    public static function syncGlobalStatus(int $userId, int $packageId, int $refId, object $data, int $new_global_status, bool $time_from_lms): void
+    public static function syncGlobalStatus(int $userId, int $packageId, int $refId, object $data, ?int $new_global_status, bool $time_from_lms): void
     {
         global $DIC;
         $ilDB = $DIC->database();
-        $ilLog = $DIC["ilLog"];
+        $ilLog = ilLoggerFactory::getLogger('sc13');
         $saved_global_status = $data->saved_global_status;
         $ilLog->write("saved_global_status=" . $saved_global_status);
 
-        //update percentage_completed, sco_total_time_sec,status in sahs_user
+        if ($new_global_status === null) {
+            $ilLog->warning(
+                "SCORM2004 syncGlobalStatus: now_global_status missing/null in client payload for "
+                . "packageId=" . $packageId . ", userId=" . $userId . ", refId=" . $refId . ". "
+                . "Skipping sahs_user.status/ut_lp_marks update for this commit to avoid overwriting "
+                . "an existing valid status with an unknown value."
+            );
+        }
+
+        //update percentage_completed, sco_total_time_sec in sahs_user - status only if it can be trusted
         $totalTime = (int) $data->totalTimeCentisec;
         $totalTime = round($totalTime / 100);
-        $ilDB->queryF(
-            'UPDATE sahs_user SET sco_total_time_sec=%s, status=%s, percentage_completed=%s WHERE obj_id = %s AND user_id = %s',
-            array('integer', 'integer', 'integer', 'integer', 'integer'),
-            array($totalTime, $new_global_status, $data->percentageCompleted, $packageId, $userId)
-        );
+        if ($new_global_status !== null) {
+            $ilDB->queryF(
+                'UPDATE sahs_user SET sco_total_time_sec=%s, status=%s, percentage_completed=%s WHERE obj_id = %s AND user_id = %s',
+                array('integer', 'integer', 'integer', 'integer', 'integer'),
+                array($totalTime, $new_global_status, $data->percentageCompleted, $packageId, $userId)
+            );
+        } else {
+            $ilDB->queryF(
+                'UPDATE sahs_user SET sco_total_time_sec=%s, percentage_completed=%s WHERE obj_id = %s AND user_id = %s',
+                array('integer', 'integer', 'integer', 'integer'),
+                array($totalTime, $data->percentageCompleted, $packageId, $userId)
+            );
+        }
 
         self::ensureObjectDataCacheExistence();
 
         $ilObjDataCache = $DIC["ilObjDataCache"];
 
-        // update learning progress
-        if ($new_global_status != null) {//could only happen when synchronising from SCORM Offline Player
+        // update learning progress only when we actually have a trustworthy status value
+        if ($new_global_status !== null) {
             ilLPStatus::writeStatus($packageId, $userId, $new_global_status, (int) $data->percentageCompleted);
 
             //			here put code for soap to MaxCMS e.g. when if($saved_global_status != $new_global_status)
